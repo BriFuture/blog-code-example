@@ -27,14 +27,14 @@ class Main{
     private int station = 0;  // station 个公交车站
     private int carSize = 0;  // 固定载客量
     private int cases   = 0;  // 可能的情况数
-    private int[] d_i;        // 乘客数量变化值
+    private int[] diff;        // 乘客数量变化值
     private int[] person;
 
     public static void main(String [] args){
         Main m = new Main();
         try {
             m.init();
-            // m.printPersonRange();
+            m.printPersonRange();
             m.findMinCase();
         } catch (Exception e) {
             e.printStackTrace();
@@ -54,12 +54,12 @@ class Main{
         /*===========================================================*/
 
         /*========= read second line to get variable d_i and initialize person =========*/
-        d_i = new int[station];
+        diff = new int[station];
         person  = new int[(station+1)*2];  // odd means lower, even means upper
         String secondLine = br.readLine();
         String[] second = secondLine.split(" ");
         for (int i = 0; i < station; i++) {
-            d_i[i] = Integer.valueOf(second[i]);
+            diff[i] = Integer.valueOf(second[i]);
             person[i*2] = 0;
             person[i*2+1] = carSize;
         }
@@ -67,37 +67,25 @@ class Main{
         person[station*2+1] = carSize;
         /*========================================================*/
 
-        int tmp = 0, tmpMax = carSize, tmpMin = 0;
-        tmp = carSize - d_i[0];
-        
+        int tmpMax = carSize, tmpMin = 0;
+
         // 算出 P0 的最小最大值
         person[0*2] = getMax(0, -diff[0]);
         person[0*2+1] = getMin(carSize, carSize - diff[0]);
 
-        for(int gap = 1; gap < station; gap++) {
-            for(int i = gap; i < station + 1; i++) {
-                tmpMax = person[(i-gap)*2+1] + personChanged(i-gap, i);
-                tmpMin = person[(i-gap)*2]   + personChanged(i-gap, i);
-
-                if( i < station) {
-                    // 最后一个计算的时候没有额外的约束条件了
-                    tmp = carSize - d_i[i];
-                    tmpMax = getMin(tmp, tmpMax);  // 取较小的（即取交集）
-                }
-
-                if( tmpMax < tmpMin ) {
-                    // 若上限小于下限，对应的不等式不成立,说明不存在这种情况
-                    cases = 0;
-                    return;
-                }
-
-                tmpMax = getMin(tmpMax, carSize);
-                person[i*2+1] = getMin(person[i*2+1], tmpMax);
-
-                tmpMin = getMax(0, tmpMin);
-                person[i*2] = getMax(person[i*2], tmpMin);
-            }
+        // 迭代算出 P1 - Pn-1 的最小最大值
+        for(int i = 1; i < station; i++) {
+            tmpMin = person[(i-1)*2];
+            tmpMax = person[(i-1)*2+1];
+            person[i*2]   = getMax( 0, tmpMin + diff[i-1], -diff[i] );
+            person[i*2+1] = getMin( carSize, tmpMax + diff[i-1], carSize - diff[i] );
         }
+
+        // 算出 Pn 的最小最大值
+        tmpMin = person[(station-1)*2];
+        tmpMax = person[(station-1)*2+1];
+        person[station*2]   = tmpMin + diff[station-1];
+        person[station*2+1] = tmpMax + diff[station-1];
 
     }
 
@@ -108,6 +96,10 @@ class Main{
         int tmpCase;
         for(int i = 0; i <= station; i++) {
             tmpCase = person[i*2+1]-person[i*2]+1;
+            if( tmpCase < 0 ) {
+                cases = 0;
+                return;
+            }
             if(cases > tmpCase) {
                 cases = tmpCase;
             }
@@ -135,7 +127,7 @@ class Main{
     private int personChanged(int from, int to) {
         int p = 0;
         for(int i = from; i < to; i++)
-            p += d_i[i];
+            p += diff[i];
 
         return p;
     }
@@ -147,7 +139,21 @@ class Main{
      * @return
      */
     private int getMax(int a, int b) {
-        return (a > b) ? a : b;
+        return ( a > b ) ? a : b;
+    }
+
+    /**
+     * 取 a，b，c 中的最大值
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    private int getMax(int a, int b, int c) {
+        int m;
+        m = ( a > b ) ? a : b;
+        m = ( m > c ) ? m : c;
+        return m;
     }
 
     /**
@@ -157,7 +163,21 @@ class Main{
      * @return
      */
     private int getMin(int a, int b) {
-        return (a<b) ? a: b;
+        return ( a < b ) ? a : b;
+    }
+
+    /**
+     * 取 a，b，c 中的最小值
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    private int getMin(int a, int b, int c) {
+        int m;
+        m = ( a < b ) ? a : b;
+        m = ( m < c ) ? m : c;
+        return m;
     }
 
 }
