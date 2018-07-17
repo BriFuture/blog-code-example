@@ -15,35 +15,46 @@ class Grid {
     }
 
     /**
-     *
-     * @param {In} value
+     * 设置 value（数独终盘中的值）
+     * @param {Number} value
      */
     setValue( value ) {
         this.value = value;
     }
 
+    /**
+     * 用户填写的值
+     * @param {Number} value 
+     */
     placeValue( value ) {
         this.userValue = value;
     }
 
+    /**
+     * 判断用户填写的值是否正确
+     * @returns {Boolean}
+     */
     isRight() {
         return this.value === this.userValue;
     }
 
     /**
-     *
+     * 设置方格是否可见
      * @param {Boolean} v
      */
     setVisibility( v ) {
         this.visibility = v;
     }
 
+    /**
+     * 查询方格是否可见
+     */
     isVisible() {
         return this.visibility;
     }
 
     /**
-     * 
+     * 判断值 v 是否在有效区间内
      * @param {Number} v 
      */
     static isValidValue(v) {
@@ -54,7 +65,7 @@ class Grid {
     }
 
     /**
-     * 
+     * 返回 grid 对象所在的块行列
      * @param {{row: Number, col: number}} grid 
      * @returns {{row:Number, col: Number}}
      */
@@ -68,57 +79,149 @@ class Grid {
 
 class Utils {
     /**
-     * 
-     * @param   {Array<Number>} exclude 
-     * @returns {Array<Number>}
+     * 数组中的元素去重，只保留唯一的元素
+     * @param {Array<>} array 要去重的数组
+     * @returns {Array<>} 元素全部唯一的数组
      */
-    static getRandomValueArray(exclude) {
-        let baseArr = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-        let exCount = 0;
-        if( exclude && exclude.length > 0 ) {
-            baseArr.forEach( (element, index) => {
-                if( exclude.includes(element) ) {
-                    baseArr[index] = 100;  // 移除要排除的数字
-                    exCount++;
-                }
-            });
-            baseArr.sort( (a, b) => {
-                return a > b;  // 顺序排列
-            });
-            for (let i = 0; i < exCount; i++) {
-                baseArr.pop();
+    static distinctArray(array) {
+        let result = array.sort().reduce( (pre, current) => {
+            if( pre.length == 0 || pre[pre.length-1] != current ) {
+                pre.push( current );
             }
-        }
-
-       let arr = new Array(9 - exCount);
-       let randomIndex;
-       for(let i = 0; i < arr.length; i++) {
-           randomIndex = Math.floor( Math.random() * (9 - exCount) );
-           arr[i] = baseArr[randomIndex];
-           baseArr[randomIndex] = baseArr[ 9 - 1 - exCount ];
-           baseArr[ 9 - 1 - exCount ] = 0;
-           exCount++;
-       }
-       return arr;
+            return pre;
+        }, []);
+        return result;
     }
 
     /**
-     * 
+     * 将 basic 数组中与 exclude 数组中相同的元素剔除掉
+     * @param   {{basic: Array<Number>, exclude: Array<Number>, keepOrder: Boolean}} params
+     * @param   {Array<Number>} basic  基本数组
+     * @param   {Array<Number>} exclude  要排除的元素构成的数组
+     * @param   {Bollean} keepOrder  是否保留原来的数组顺序，若否或无定义，则打乱数组
+     * @returns {Array<Number>} 去掉重叠元素的数组的数组
+     */
+    static getRandomValue(params) {
+        params = ( params === undefined ) ? {} : params;
+
+        let basic = params.basic, exclude = params.exclude;
+        if( basic === undefined ) {
+            basic = this.genBasicArray();
+            // let basic = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        }
+        let exCount = 0;
+        if( exclude && exclude.length > 0 ) {
+            basic.forEach( (element, index) => {
+                if( exclude.includes(element) ) {
+                    basic[index] = 100;  // 移除要排除的数字
+                    exCount++;
+                }
+            });
+            basic.sort( (a, b) => {
+                return a > b;  // 从小到大顺序排列
+            });
+            for (let i = 0; i < exCount; i++) {
+                basic.pop();
+            }
+        }
+
+        if( !params.keepOrder )
+            return this.randomArray(basic);
+        else
+            return basic;
+    }
+
+    /**
+     * 打乱数组
+     * @param {Array<>} array 
+     * @returns 数组乱序排列的数组
+     */
+    static randomArray(array) {
+        let size = array.length;
+        let arr = new Array(size);
+        let randomIndex;
+        let exCount = 0;
+        for(let i = 0; i < size; i++) {
+            randomIndex = Math.floor( Math.random() * (size - exCount) );
+            arr[i] = array[randomIndex];
+            array[randomIndex] = array[ size - 1 - exCount ];
+            array[ size - 1 - exCount ] = 0;
+            exCount++;
+        }
+        return arr;
+    }
+
+    /**
+     * 判断某一组 Grid 对象是否有效，值从 1 ~ 9 且不重复
      * @param {Array<Number>} grids 
      *      
-     * @returns {Boolean}
+     * @returns {Boolean} 
      */
     static isGridsValueValid( gridsValue ) {
-        let sum = 0;
-
+        let sum   = 0;
+        let value = this.distinctArray(gridsValue);
         for( let i = 0; i < 9; i++ ) {
-            sum += gridsValue[i];
+            sum += value[i];
         }
 
         if( sum == 45 ) {
             return true;
         }
         return false;
+    }
+
+    /**
+     * 将 1~9 这 9 个元素填充到数组并返回该数组
+     * @returns {Array<Number>} 包含 1~9 这 9 个顺序排列的数组
+     */
+    static genBasicArray() {
+        return [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    }
+
+    /**
+     * 顺序打印出所有格子
+     */
+    static printAll(board) {
+        let toPrint = "";
+
+        for( let i = 0; i < 9; i++ ) {
+            for( let j = 0; j < 9; j++ ) {
+                toPrint += board.grids[i * 9 + j].value + " ";
+            }
+
+            toPrint += "\n";
+        }
+
+        console.log( toPrint );
+    }
+
+    static printRow(board, row) {
+        let toPrint = "";
+        for( let j = 0; j < 9; j++ ) {
+            toPrint += board.grids[row * 9 + j].value + " ";
+        }
+        toPrint += "\n";
+
+        console.log( toPrint );
+    }
+}
+
+class Choice {
+    /**
+     * 
+     * @param {Array<Number>} choiceSet 
+     */
+    constructor(choiceSet) {
+        this.choiceSet = choiceSet;
+        this.attemptIndex = -1;
+    }
+
+    /**
+     * 将索引移至下一个位置，并返回该位置的数字
+     */
+    next() {
+        this.attemptIndex++;
+        return this.choiceSet[this.attemptIndex];
     }
 }
 
@@ -137,67 +240,94 @@ class Board {
     init() {
         // populate the first row
         let row0 = this.getRowGrids(0);
-        let randomArray = this.getRandomValueArray([]);
+        let randomArray = Utils.getRandomValue();
         randomArray.forEach( (element, index ) => {
             row0[index].setValue( element );
         });
 
-        this.printAll();
+        // Utils.printAll(this);
  
-        let validValue;
+        let used, unused, grid, index;
         for(let i = 1; i < 9; i++) {
             for(let j = 0; j < 9; j++) {
-                validValue = this.getRandomValidValue({row: i, col: j});
-                this.grids[i*9+j].setValue( validValue );
-                this.printAll();
+                grid = this.grids[i*9+j];
+                // process.stdout.write( `i=${i}, j=${j}.  `);
+                if( grid.choice === undefined ) {
+                    used   = this.getUsedValueArrayAt( {row: i, col: j} );
+                    unused = Utils.getRandomValue( {exclude: used} );
+                    grid.choice = new Choice( unused );
+                }
+                index = this.populateGrid(grid);
+                i = index.i; 
+                j = index.j;
             }
         }
     }
 
     /**
+     * 填充方格，并返回修正过的 i，j索引
      * 
+     * 该函数属于回溯部分，在方格没有可选数字时，修正索引，以便进行回溯
+     * @param {Grid} grid 
+     * @returns {{i: Number, j: Number}}
+     */
+    populateGrid(grid) {
+        let i = grid.row, j = grid.col;
+        let value = grid.choice.next();
+
+        if( value !== undefined ) {
+            // 有可以选择的数字
+            grid.setValue(value);
+        }
+        else {
+            // 没有可选的数字
+            // Utils.printRow(this, i);
+            grid.value  = 0;
+            grid.choice = undefined;
+            if( j == 0 ) {
+                // i = (i > 0 ? i - 1 : i );
+                i -= 1;
+                j -= 1;
+                this.resetPartialGrids({rowStart: i, rowEnd: i+1, colStart: 1, colEnd: 9});  // 返回上一行后，清空该行其它列的数据
+            }
+            else {
+                j -= 2;
+            }
+        }
+        return {i, j};
+    }
+
+    /**
+     * 获取位置 pos 上可以存放的值集合（乱序）
+     * 
+     * 注意，可能会出现每个位置没有可用的数字，这时该函数返回 0 而不是 undefined
      * @param {{row: Number, col: Number}} pos 
      * @return Number
      */
     getRandomValidValue(pos) {
         let used = this.getUsedValueArrayAt(pos);
-        let valueArray = this.getRandomValueArray(used);
+        let valueArray = Utils.getRandomValue({exclude: used});
         return valueArray[0] === undefined ? 0 : valueArray[0];
     }
 
     /**
-     * 
+     * 按指定的模式，获得位置为（i，j）的使用过的数字集合
      * @param {{mode: String, row: Number, col: Number}} cond 
      *      mode can be row, column or block
-     * @returns Array
+     * @returns Array<Number>
      */
     getUsedValueArray( cond ) {
-        let mode = cond.mode;
-        let grids;
-        switch (mode) {
-            case "row":
-            grids = this.getRowGrids( cond.row );
-            break;
-            case "column":
-            grids = this.getColumnGrids( cond.col );
-            break;
-            case "block":
-            grids = this.getBlockGrids( cond.row, cond.col );
-            break;
-            default:
-            grids = new Array();
-            break;
-        }
+        let grids = this.getGrids( cond );
         let arr = new Array();
-        grids.forEach( element => {
-            if( Grid.isValidValue( element.value ) )
-                arr.push( element.value )
+        grids.forEach( grid => {
+            if( Grid.isValidValue( grid.value ) )
+                arr.push( grid.value )
         });
         return arr;
     }
 
     /**
-     * 
+     * 获取 pos 位置上不可用的值集合，包括 pos 所在的行、列和块中有效的值
      * @param {{row: Number, col: Number}} pos 
      * @returns Array<Number>
      */
@@ -212,18 +342,13 @@ class Board {
         used.push.apply( used, rowGrids );
         used.push.apply( used, colGrids );
         used.push.apply( used, blockGrids );
-        let result = used.sort().reduce( (pre, current) => {
-            if( pre.length == 0 || pre[pre.length-1] != current ) {
-                pre.push( current );
-            }
-            return pre;
-        }, []);
-        console.log( row + "  " + "  " + col + "  ", result )
+        let result = Utils.distinctArray( used );
+        // console.log( `used at: ${row}  ${col}  ${result}` );
         return result;
     }
 
     /**
-     *
+     * 获取第 row 行的所有格子对象
      * @param {Number} row
      * @return {Array<Grid>}
      */
@@ -238,7 +363,7 @@ class Board {
     }
 
     /**
-     * 
+     * 获取第 col 列的所有格子对象
      * @param {Number} col 
      * @return {Array<Grid>}
      */
@@ -253,7 +378,7 @@ class Board {
     }
 
     /**
-     * 
+     * 获取某一块（块的行数为 row， 块的列数为 col）的格子对象
      * @param {Number} row 
      * @param {Number} col 
      * @return {Array<Grid>}
@@ -271,6 +396,7 @@ class Board {
     }
 
     /**
+     * 获取任意有效区域的格子
      * row range: [rowStart, rowEnd) , rowStart is INCLUDED while rowEnd is not
      * col range: [colStart, colEnd)
      * @param {{rowStart: Number, colStart: Number, rowEnd: Number, colEnd: Number}} area 
@@ -278,7 +404,7 @@ class Board {
      */
     getPartialGrids(area) {
         let size = (area.rowEnd - area.rowStart) * (area.colEnd - area.colStart);
-        if( size <= 0) {
+        if( size <= 0 ) {
             return new Array();
         }
         let part = new Array();
@@ -292,7 +418,23 @@ class Board {
     }
 
     /**
+     * 将某部分格子的值重设为 0
      * 
+     * row range: [rowStart, rowEnd) , rowStart is INCLUDED while rowEnd is not
+     * 
+     * col range: [colStart, colEnd)
+     * @param {{rowStart: Number, colStart: Number, rowEnd: Number, colEnd: Number}} area 
+     */
+    resetPartialGrids(area) {
+        let part = this.getPartialGrids(area);
+        part.forEach( grid => {
+            grid.value = 0;
+            grid.choice = undefined;
+        });
+    }
+
+    /**
+     * 根据 cond 参数获取格子
      * @param {{mode: String, row:Number, col: Number}} cond 
      */
     getGrids(cond) {
@@ -316,7 +458,7 @@ class Board {
     }
 
     /**
-     * 
+     * 用户填写第 row 行，第 col 列的值 num
      * @param {Number} row 
      * @param {Number} col 
      * @param {Number} num 
@@ -333,18 +475,46 @@ class Board {
         grid.placeValue( num );
     }
 
-    printAll() {
-        let toPrint = "";
-
-        for( let i = 0; i < 9; i++ ) {
-            for( let j = 0; j < 9; j++ ) {
-                toPrint += this.grids[i * 9 + j].value + " ";
-            }
-
-            toPrint += "\n";
+    /**
+     * 判断当前棋盘是否是有效的数独终盘，若不符合数独的规则，则返回 false
+     */
+    isValid() {
+        let grids;
+        let sum = 0;
+        let valid = true;
+        for(let i = 0; i < 9; i++) {
+            grids = this.getRowGrids(i);
+            grids.forEach(g => {
+                sum += g.value;
+            })
+            valid &= ( sum === 45 );
+            sum = 0;
         }
 
-        console.log( toPrint );
+        for(let i = 0; i < 9; i++) {
+            grids = this.getColumnGrids(i);
+            grids.forEach(g => {
+                sum += g.value;
+            })
+            valid &= ( sum === 45 );
+            sum = 0;
+        }
+
+        for(let i = 0; i < 3; i++) {
+            for(let j = 0; j < 3; j++) {
+                grids = this.getBlockGrids(i, j);
+                grids.forEach(g => {
+                    if( g === undefined) {
+                        console.log( "undefined" )
+                    }
+                    sum += g.value;
+                })
+                valid &= ( sum === 45 );
+                sum = 0;
+            }
+        }
+
+        return valid;
     }
 }
 
@@ -355,18 +525,7 @@ class Game {
     constructor( difficuty ) {
         this.board = new Board();
         this.board.init();
-        let board = this.board;
-        board.setNumberAt( 1, 2, 8 );
-        board.setNumberAt( 4, 0, 4 );
-        board.setNumberAt( 4, 1, 2 );
-        board.setNumberAt( 4, 2, 3 );
-        board.setNumberAt( 4, 3, 1 );
-        board.setNumberAt( 4, 4, 5 );
-        board.setNumberAt( 4, 5, 6 );
-        board.setNumberAt( 4, 6, 9 );
-        board.setNumberAt( 4, 7, 7 );
-        board.setNumberAt( 4, 8, 8 );
-        board.printAll();
+
     }
 }
 
@@ -376,4 +535,3 @@ Game.DifficutyHard = 0;
 
 // let g = new Game(Game.DifficutyEasy);
 // export {Game, Board, Grid}
-
