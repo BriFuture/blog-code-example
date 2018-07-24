@@ -1,0 +1,52 @@
+.board {
+    table-layout: fixed;
+    border: #443 3px solid;
+    width: 455px;
+    height: 455px;
+    background-color: #fff;
+    vertical-align: middle;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+.grid {
+    background-color: #fff;
+}
+
+tr {
+    display: table-row;
+    vertical-align: inherit;
+    border-color: inherit;
+}
+
+.grid-show {
+    border: #999 1px solid;
+    /* border-top: #999 1px solid; */
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    LINE-height: 40px;
+}
+
+.grid-input {
+    border: #443 1px solid;
+    font-size: 16px;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+}
+
+button {
+    min-width: 80px;
+    min-height: 40px;
+    text-align: center;
+    margin: 15px
+}
+
+p.result-right {
+    color: green
+}
+
+p.result-wrong {
+    color: red
+}

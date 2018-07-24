@@ -42,7 +42,7 @@ class Grid {
      * 设置方格是否可见
      * @param {Boolean} v
      */
-    setVisibility( v ) {
+    setVisible( v ) {
         this.visibility = v;
     }
 
@@ -183,10 +183,16 @@ class Utils {
      */
     static printAll(board) {
         let toPrint = "";
-
+        let value, grid;
         for( let i = 0; i < 9; i++ ) {
             for( let j = 0; j < 9; j++ ) {
-                toPrint += board.grids[i * 9 + j].value + " ";
+                grid = board.grids[i * 9 + j];
+                if( grid.isVisible() )
+                    value = grid.value
+                else
+                    value = 'X';
+                    
+                toPrint += value + " ";
             }
 
             toPrint += "\n";
@@ -477,25 +483,22 @@ class Board {
 
     /**
      * 判断当前棋盘是否是有效的数独终盘，若不符合数独的规则，则返回 false
+     * @param {Boolean} userPlaced 是否判断用户填写的值
      */
-    isValid() {
+    isValid(userPlaced) {
         let grids;
         let sum = 0;
         let valid = true;
         for(let i = 0; i < 9; i++) {
             grids = this.getRowGrids(i);
-            grids.forEach(g => {
-                sum += g.value;
-            })
+            sum = this.sumGrids( grids, userPlaced );
             valid &= ( sum === 45 );
             sum = 0;
         }
 
         for(let i = 0; i < 9; i++) {
             grids = this.getColumnGrids(i);
-            grids.forEach(g => {
-                sum += g.value;
-            })
+            sum = this.sumGrids( grids, userPlaced );
             valid &= ( sum === 45 );
             sum = 0;
         }
@@ -503,18 +506,30 @@ class Board {
         for(let i = 0; i < 3; i++) {
             for(let j = 0; j < 3; j++) {
                 grids = this.getBlockGrids(i, j);
-                grids.forEach(g => {
-                    if( g === undefined) {
-                        console.log( "undefined" )
-                    }
-                    sum += g.value;
-                })
+                sum = this.sumGrids( grids, userPlaced );
                 valid &= ( sum === 45 );
                 sum = 0;
             }
         }
-
         return valid;
+    }
+
+    /**
+     * 
+     * @param {Array<Grid>} grids 
+     * @param {Boolean} userPlaced
+     */
+    sumGrids(grids, userPlaced) {
+        let sum = 0;
+        grids.forEach(g => {
+            if( userPlaced && !g.isVisible()) {
+                sum += g.userValue;
+            }
+            else {
+                sum += g.value;
+            }
+        });
+        return sum;
     }
 }
 
@@ -525,13 +540,54 @@ class Game {
     constructor( difficuty ) {
         this.board = new Board();
         this.board.init();
+        if( difficuty <= 0 || difficuty > 3 ) {
+            difficuty = 2;
+        }
+        this.digTimes = difficuty*2;
+        this.digCount = 0;
 
+        this.digBoard();
     }
+
+    /**
+     * 挖去一部分格子，将属性设为隐藏
+     */
+    digBoard() {
+        let dig = 0, block;
+        for(let i = 0; i < 3; i++) {
+            for(let j = 0; j < 3; j++) {
+                for( let k = 0; k < this.digTimes; k++) {
+                    block = this.board.getBlockGrids(i, j);
+                    dig   = Math.floor( Math.random() * 9 );
+
+                    if( block[dig].isVisible() ) {
+                        // avoid duplicated hiding
+                        block[dig].setVisible(false);
+                        this.digCount += 1;
+                    } 
+                }
+            }
+        }
+        // Utils.printAll(this.board);
+    }
+
+    /**
+     * 若返回值为 undefined，说明该位置的值不应该显示出来
+     * @param {Number} row 行索引
+     * @param {Number} col 列索引
+     */
+    getValueAt(row, col) {
+        let grid = this.board.grids[ row * 9 + col ];
+        if( grid.isVisible() )
+            return grid.value;
+
+        return undefined
+    }
+
 }
 
-Game.DifficutyEasy = 0;
-Game.DifficutyNormal = 0;
-Game.DifficutyHard = 0;
+Game.DifficutyEasy = 1;
+Game.DifficutyNormal = 2;
+Game.DifficutyHard = 3;
 
-// let g = new Game(Game.DifficutyEasy);
 // export {Game, Board, Grid}

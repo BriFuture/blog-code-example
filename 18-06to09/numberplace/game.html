@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Number Place Game</title>
+  <link rel="stylesheet" href="./game.css">
+</head>
+<body>
+    <div align="center">
+      <div id="gamediv" align="center">
+
+      </div>
+      <div>
+        <p id="result-label" class="result-normal"></p>
+      </div>
+      <hr />
+      <div id="time">
+        <p id="time-label">00:00:00</p>
+      </div>
+      <div id="difficuty">
+        <input type="radio" name="difficuty" value="1" onmouseup="changeDifficuty(this.value)" checked="checked" />Easy
+        <input type="radio" name="difficuty" value="2" onmouseup="changeDifficuty(this.value)" /> Normal
+        <input type="radio" name="difficuty" value="3" onmouseup="changeDifficuty(this.value)" /> Hard
+      </div>
+      <div id="buttons">
+        <button onclick="genBoard()" type="button">restart game</button>
+        <button onclick="tu.startTimer()" type="button">Start Game</button>
+      </div>
+    </div>
+  <script src="./NumberPlaceCore.js"></script>
+  <script src="./game.js"></script>
+</body>
+</html>
