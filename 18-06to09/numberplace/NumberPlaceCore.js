@@ -544,7 +544,6 @@ class Game {
             difficuty = 2;
         }
         this.digTimes = difficuty*2;
-        this.digCount = 0;
 
         this.digBoard();
     }
@@ -563,7 +562,6 @@ class Game {
                     if( block[dig].isVisible() ) {
                         // avoid duplicated hiding
                         block[dig].setVisible(false);
-                        this.digCount += 1;
                     } 
                 }
             }
