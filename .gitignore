@@ -1,0 +1,10 @@
+*.pyc
+__pycache__
+venv*
+logfile.txt
+build
+*.egg-info
+dist
+.cache
+*.pro.user
+deprecated

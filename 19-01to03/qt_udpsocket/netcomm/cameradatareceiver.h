@@ -39,7 +39,6 @@ private:
     int packetCount = 0;
     int byteRecved = 0;
 
-    friend class Controller;
 };
 
 #endif // CAMERADATARECEIVER_H
