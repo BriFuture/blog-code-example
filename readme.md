@@ -4,6 +4,7 @@
 
 * [数独游戏][numberplace-game]
 * [椭圆示例][oval-circle-example]
+* [Qt Style 样式示例](./19-01to03/qt_style/effect.md)
 
 
 ## About The code

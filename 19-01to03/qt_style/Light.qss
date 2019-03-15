@@ -1,0 +1,12 @@
+QPushButton[variable="success"] {
+    background: lightgreen;
+}
+
+QPushButton[variable="primary"] {
+    background: lightblue;
+}
+
+/* Made by BriFuture */
+QPushButton[variable="warning"] {
+    background: rgb(243, 125, 125);
+}
