@@ -19,4 +19,4 @@ Code in this repository is under [MIT License](./license).
 
 [numberplace-game]: https://brifuture.github.io/blog-code-example/18-06to09/numberplace/game.html
 [oval-circle-example]:  https://brifuture.github.io/blog-code-example/18-06to09/canvas2d/canvas2d.html
-[compassvue-demo]: https://brifuture.github.io/blog-code-example/19-01to03/compassvue-demo/index.html
+[compassvue-demo]: https://brifuture.github.io/blog-code-example/19-q2/compassvue-demo/index.html
