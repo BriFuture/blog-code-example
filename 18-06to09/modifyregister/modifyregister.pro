@@ -20,6 +20,6 @@ win32 {
   QMAKE_LFLAGS += /MANIFESTUAC:\"level=\'requireAdministrator\' uiAccess=\'false\'\"
 }
 
-DISTFILES += \
-    manifest.xml
-
+DISTFILES += manifest.xml
+VERSION = 1.0.0.0
+DESTDIR = $$OUT_PWD/app

@@ -12,6 +12,7 @@
 * [椭圆示例][oval-circle-example]
 * [Qt Style 样式示例](./19-01to03/qt_style/readme.md)
 * [Compassvue WebGL 3D 程序][compassvue-demo]
+* [华为鲲鹏开发者比赛代码及模拟服务器](./19-q3q4/huawei kunpen race/README.md)
 
 ## About The code
 
