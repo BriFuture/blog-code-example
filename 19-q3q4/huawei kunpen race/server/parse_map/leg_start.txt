@@ -1,0 +1,28 @@
+{
+    "msg_name": "leg_start",
+    "msg_data": {
+        "map": {
+            "width": 15,
+            "height": 15,
+            "vision": 3,
+            "meteor": [
+                {"x": 1, "y": 1},
+                {"x": 1, "y": 4}
+            ],
+            "tunnel": [
+                {"x": 3, "y": 1, "direction": "down"},
+                {"x": 3, "y": 4, "direction": "down"}
+            ],
+            "wormhole": [
+                {"name": "a","x": 4, "y": 1},
+                {"name": "A", "x": 4, "y": 4 }
+            ]
+
+        },
+        "teams" : [
+            {"id": 1001, "players": [0, 1, 2, 3], "force": "beat"},
+            {"id": 1002, "players": [4, 5, 6, 7], "force": "think"},
+
+        ]
+    }
+}

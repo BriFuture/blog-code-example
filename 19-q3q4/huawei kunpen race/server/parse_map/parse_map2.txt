@@ -1,0 +1,107 @@
+02010
+{
+  "block_name":"round",
+  "mines":[
+    {"id":32,"value":1,"x":3,"y":2},
+    {"id":33,"value":1,"x":7,"y":2},
+    {"id":34,"value":1,"x":12,"y":2},
+    {"id":35,"value":1,"x":16,"y":2},
+    {"id":36,"value":1,"x":2,"y":3},
+    {"id":37,"value":1,"x":17,"y":3},
+    {"id":38,"value":1,"x":2,"y":7},
+    {"id":39,"value":1,"x":17,"y":7},
+    {"id":40,"value":2,"x":8,"y":8},
+    {"id":41,"value":1,"x":9,"y":8},
+    {"id":42,"value":1,"x":10,"y":8},
+    {"id":43,"value":2,"x":11,"y":8},
+    {"id":44,"value":1,"x":8,"y":9},
+    {"id":45,"value":5,"x":9,"y":9},
+    {"id":46,"value":5,"x":10,"y":9},
+    {"id":47,"value":1,"x":11,"y":9},
+    {"id":48,"value":1,"x":8,"y":10},
+    {"id":49,"value":5,"x":9,"y":10},
+    {"id":50,"value":5,"x":10,"y":10},
+    {"id":51,"value":1,"x":11,"y":10},
+    {"id":52,"value":2,"x":8,"y":11},
+    {"id":53,"value":1,"x":9,"y":11},
+    {"id":54,"value":1,"x":10,"y":11},
+    {"id":55,"value":2,"x":11,"y":11},
+    {"id":56,"value":1,"x":2,"y":12},
+    {"id":57,"value":1,"x":17,"y":12},
+    {"id":58,"value":1,"x":2,"y":16},
+    {"id":59,"value":1,"x":17,"y":16},
+    {"id":60,"value":1,"x":3,"y":17},
+    {"id":61,"value":1,"x":7,"y":17},
+    {"id":62,"value":1,"x":12,"y":17},
+    {"id":63,"value":1,"x":16,"y":17}
+  ],
+  "mode":"light",
+  "players":[
+    {"moveOn":"blank","player_id":0,"point":0,"sleep":0,"status":"alive","team_id":1134,"x":0,"y":7},
+    {"moveOn":"blank","player_id":1,"point":0,"sleep":0,"status":"alive","team_id":1134,"x":19,"y":7},
+    {"moveOn":"blank","player_id":2,"point":0,"sleep":0,"status":"alive","team_id":1134,"x":0,"y":12},
+    {"moveOn":"blank","player_id":3,"point":0,"sleep":0,"status":"alive","team_id":1134,"x":19,"y":12},
+    {"moveOn":"blank","player_id":4,"point":0,"sleep":0,"status":"alive","team_id":1123,"x":1,"y":0},
+    {"moveOn":"blank","player_id":5,"point":0,"sleep":0,"status":"alive","team_id":1123,"x":10,"y":0},
+    {"moveOn":"blank","player_id":6,"point":0,"sleep":0,"status":"alive","team_id":1123,"x":9,"y":19},
+    {"moveOn":"blank","player_id":7,"point":0,"sleep":0,"status":"alive","team_id":1123,"x":18,"y":19}
+  ],
+  "round_id":0,
+  "teams":[
+    {"point":0,"remain_life":4,"team_id":1134},
+    {"point":0,"remain_life":4,"team_id":1123}
+  ]
+}
+
+effects : belts, createmines, kills
+
+01259
+{
+  "block_name":"round",
+  "effects": {
+    "belts":[
+      {"x":6,"y":5}
+    ]
+  },
+  "mines":[
+    {"id":154,"value":2,"x":8,"y":8},
+    {"id":157,"value":2,"x":11,"y":8},
+    {"id":158,"value":5,"x":10,"y":9},
+    {"id":155,"value":1,"x":11,"y":9},
+    {"id":152,"value":1,"x":8,"y":10},
+    {"id":159,"value":5,"x":10,"y":10},
+    {"id":160,"value":2,"x":8,"y":11},
+    {"id":156,"value":1,"x":10,"y":11}
+  ],
+  "mode":"dark",
+  "players":[
+    {"moveOn":"blank","player_id":0,"point":0,"sleep":0,"status":"dead","team_id":1134,"x":5,"y":2},
+    {"moveOn":"blank","player_id":1,"point":2,"sleep":0,"status":"alive","team_id":1134,"x":13,"y":2},
+    {"moveOn":"blank","player_id":2,"point":0,"sleep":0,"status":"dead","team_id":1134,"x":9,"y":19},
+    {"moveOn":"blank","player_id":3,"point":0,"sleep":0,"status":"dead","team_id":1134,"x":18,"y":19},
+    {"moveOn":"blank","player_id":4,"point":5,"sleep":0,"status":"alive","team_id":1123,"x":4,"y":4},
+    {"moveOn":"blank","player_id":5,"point":46,"sleep":0,"status":"alive","team_id":1123,"x":5,"y":4},
+    {"moveOn":"belt","player_id":6,"point":3,"sleep":0,"status":"alive","team_id":1123,"x":15,"y":5},
+    {"moveOn":"blank","player_id":7,"point":6,"sleep":0,"status":"alive","team_id":1123,"x":6,"y":4}
+  ],
+  "round_id":72,
+  "teams":[
+    {"point":5,"remain_life":0,"team_id":1134},
+    {"point":130,"remain_life":4,"team_id":1123}
+  ]
+}
+
+effects
+{"create_mines":[{"id":64},{"id":65},{"id":66},{"id":67},{"id":68},{"id":69},{"id":70}]}
+{"distroy_mines":[{"id":56}]}
+{"belts":[{"x":5,"y":14}]}
+{"kills":[{"x":15,"y":0}]}
+
+
+==============
+
+02010{"block_name":"round","mines":[{"id":32,"value":1,"x":3,"y":2},{"id":33,"value":1,"x":7,"y":2},{"id":34,"value":1,"x":12,"y":2},{"id":35,"value":1,"x":16,"y":2},{"id":36,"value":1,"x":2,"y":3},{"id":37,"value":1,"x":17,"y":3},{"id":38,"value":1,"x":2,"y":7},{"id":39,"value":1,"x":17,"y":7},{"id":40,"value":2,"x":8,"y":8},{"id":41,"value":1,"x":9,"y":8},{"id":42,"value":1,"x":10,"y":8},{"id":43,"value":2,"x":11,"y":8},{"id":44,"value":1,"x":8,"y":9},{"id":45,"value":5,"x":9,"y":9},{"id":46,"value":5,"x":10,"y":9},{"id":47,"value":1,"x":11,"y":9},{"id":48,"value":1,"x":8,"y":10},{"id":49,"value":5,"x":9,"y":10},{"id":50,"value":5,"x":10,"y":10},{"id":51,"value":1,"x":11,"y":10},{"id":52,"value":2,"x":8,"y":11},{"id":53,"value":1,"x":9,"y":11},{"id":54,"value":1,"x":10,"y":11},{"id":55,"value":2,"x":11,"y":11},{"id":56,"value":1,"x":2,"y":12},{"id":57,"value":1,"x":17,"y":12},{"id":58,"value":1,"x":2,"y":16},{"id":59,"value":1,"x":17,"y":16},{"id":60,"value":1,"x":3,"y":17},{"id":61,"value":1,"x":7,"y":17},{"id":62,"value":1,"x":12,"y":17},{"id":63,"value":1,"x":16,"y":17}],"mode":"light","players":[{"moveOn":"blank","player_id":0,"point":0,"sleep":0,"status":"alive","team_id":1150,"x":0,"y":7},{"moveOn":"blank","player_id":1,"point":0,"sleep":0,"status":"alive","team_id":1150,"x":19,"y":7},{"moveOn":"blank","player_id":2,"point":0,"sleep":0,"status":"alive","team_id":1150,"x":0,"y":12},{"moveOn":"blank","player_id":3,"point":0,"sleep":0,"status":"alive","team_id":1150,"x":19,"y":12},{"moveOn":"blank","player_id":4,"point":0,"sleep":0,"status":"alive","team_id":1123,"x":1,"y":0},{"moveOn":"blank","player_id":5,"point":0,"sleep":0,"status":"alive","team_id":1123,"x":10,"y":0},{"moveOn":"blank","player_id":6,"point":0,"sleep":0,"status":"alive","team_id":1123,"x":9,"y":19},{"moveOn":"blank","player_id":7,"point":0,"sleep":0,"status":"alive","team_id":1123,"x":18,"y":19}],"round_id":0,"teams":[{"point":0,"remain_life":4,"team_id":1150},{"point":0,"remain_life":4,"team_id":1123}]}
+02010{"block_name":"round","mines":[{"id":32,"value":1,"x":3,"y":2},{"id":33,"value":1,"x":7,"y":2},{"id":34,"value":1,"x":12,"y":2},{"id":35,"value":1,"x":16,"y":2},{"id":36,"value":1,"x":2,"y":3},{"id":37,"value":1,"x":17,"y":3},{"id":38,"value":1,"x":2,"y":7},{"id":39,"value":1,"x":17,"y":7},{"id":40,"value":2,"x":8,"y":8},{"id":41,"value":1,"x":9,"y":8},{"id":42,"value":1,"x":10,"y":8},{"id":43,"value":2,"x":11,"y":8},{"id":44,"value":1,"x":8,"y":9},{"id":45,"value":5,"x":9,"y":9},{"id":46,"value":5,"x":10,"y":9},{"id":47,"value":1,"x":11,"y":9},{"id":48,"value":1,"x":8,"y":10},{"id":49,"value":5,"x":9,"y":10},{"id":50,"value":5,"x":10,"y":10},{"id":51,"value":1,"x":11,"y":10},{"id":52,"value":2,"x":8,"y":11},{"id":53,"value":1,"x":9,"y":11},{"id":54,"value":1,"x":10,"y":11},{"id":55,"value":2,"x":11,"y":11},{"id":56,"value":1,"x":2,"y":12},{"id":57,"value":1,"x":17,"y":12},{"id":58,"value":1,"x":2,"y":16},{"id":59,"value":1,"x":17,"y":16},{"id":60,"value":1,"x":3,"y":17},{"id":61,"value":1,"x":7,"y":17},{"id":62,"value":1,"x":12,"y":17},{"id":63,"value":1,"x":16,"y":17}],"mode":"light","players":[{"moveOn":"blank","player_id":0,"point":0,"sleep":0,"status":"alive","team_id":1150,"x":0,"y":6},{"moveOn":"blank","player_id":1,"point":0,"sleep":0,"status":"alive","team_id":1150,"x":19,"y":6},{"moveOn":"blank","player_id":2,"point":0,"sleep":0,"status":"alive","team_id":1150,"x":0,"y":11},{"moveOn":"blank","player_id":3,"point":0,"sleep":0,"status":"alive","team_id":1150,"x":19,"y":11},{"moveOn":"blank","player_id":4,"point":0,"sleep":0,"status":"alive","team_id":1123,"x":1,"y":1},{"moveOn":"blank","player_id":5,"point":0,"sleep":0,"status":"alive","team_id":1123,"x":10,"y":1},{"moveOn":"blank","player_id":6,"point":0,"sleep":0,"status":"alive","team_id":1123,"x":9,"y":18},{"moveOn":"blank","player_id":7,"point":0,"sleep":0,"status":"alive","team_id":1123,"x":18,"y":18}],"round_id":1,"teams":[{"point":0,"remain_life":4,"team_id":1150},{"point":0,"remain_life":4,"team_id":1123}]}
+02010{"block_name":"round","mines":[{"id":32,"value":1,"x":3,"y":2},{"id":33,"value":1,"x":7,"y":2},{"id":34,"value":1,"x":12,"y":2},{"id":35,"value":1,"x":16,"y":2},{"id":36,"value":1,"x":2,"y":3},{"id":37,"value":1,"x":17,"y":3},{"id":38,"value":1,"x":2,"y":7},{"id":39,"value":1,"x":17,"y":7},{"id":40,"value":2,"x":8,"y":8},{"id":41,"value":1,"x":9,"y":8},{"id":42,"value":1,"x":10,"y":8},{"id":43,"value":2,"x":11,"y":8},{"id":44,"value":1,"x":8,"y":9},{"id":45,"value":5,"x":9,"y":9},{"id":46,"value":5,"x":10,"y":9},{"id":47,"value":1,"x":11,"y":9},{"id":48,"value":1,"x":8,"y":10},{"id":49,"value":5,"x":9,"y":10},{"id":50,"value":5,"x":10,"y":10},{"id":51,"value":1,"x":11,"y":10},{"id":52,"value":2,"x":8,"y":11},{"id":53,"value":1,"x":9,"y":11},{"id":54,"value":1,"x":10,"y":11},{"id":55,"value":2,"x":11,"y":11},{"id":56,"value":1,"x":2,"y":12},{"id":57,"value":1,"x":17,"y":12},{"id":58,"value":1,"x":2,"y":16},{"id":59,"value":1,"x":17,"y":16},{"id":60,"value":1,"x":3,"y":17},{"id":61,"value":1,"x":7,"y":17},{"id":62,"value":1,"x":12,"y":17},{"id":63,"value":1,"x":16,"y":17}],"mode":"light","players":[{"moveOn":"blank","player_id":0,"point":0,"sleep":0,"status":"alive","team_id":1150,"x":0,"y":5},{"moveOn":"blank","player_id":1,"point":0,"sleep":0,"status":"alive","team_id":1150,"x":19,"y":5},{"moveOn":"blank","player_id":2,"point":0,"sleep":0,"status":"alive","team_id":1150,"x":0,"y":10},{"moveOn":"blank","player_id":3,"point":0,"sleep":0,"status":"alive","team_id":1150,"x":19,"y":10},{"moveOn":"blank","player_id":4,"point":0,"sleep":0,"status":"alive","team_id":1123,"x":1,"y":2},{"moveOn":"blank","player_id":5,"point":0,"sleep":0,"status":"alive","team_id":1123,"x":10,"y":2},{"moveOn":"blank","player_id":6,"point":0,"sleep":0,"status":"alive","team_id":1123,"x":9,"y":17},{"moveOn":"blank","player_id":7,"point":0,"sleep":0,"status":"alive","team_id":1123,"x":18,"y":17}],"round_id":2,"teams":[{"point":0,"remain_life":4,"team_id":1150},{"point":0,"remain_life":4,"team_id":1123}]}
+02008{"block_name":"round","mines":[{"id":32,"value":1,"x":3,"y":2},{"id":33,"value":1,"x":7,"y":2},{"id":34,"value":1,"x":12,"y":2},{"id":35,"value":1,"x":16,"y":2},{"id":36,"value":1,"x":2,"y":3},{"id":37,"value":1,"x":17,"y":3},{"id":38,"value":1,"x":2,"y":7},{"id":39,"value":1,"x":17,"y":7},{"id":40,"value":2,"x":8,"y":8},{"id":41,"value":1,"x":9,"y":8},{"id":42,"value":1,"x":10,"y":8},{"id":43,"value":2,"x":11,"y":8},{"id":44,"value":1,"x":8,"y":9},{"id":45,"value":5,"x":9,"y":9},{"id":46,"value":5,"x":10,"y":9},{"id":47,"value":1,"x":11,"y":9},{"id":48,"value":1,"x":8,"y":10},{"id":49,"value":5,"x":9,"y":10},{"id":50,"value":5,"x":10,"y":10},{"id":51,"value":1,"x":11,"y":10},{"id":52,"value":2,"x":8,"y":11},{"id":53,"value":1,"x":9,"y":11},{"id":54,"value":1,"x":10,"y":11},{"id":55,"value":2,"x":11,"y":11},{"id":56,"value":1,"x":2,"y":12},{"id":57,"value":1,"x":17,"y":12},{"id":58,"value":1,"x":2,"y":16},{"id":59,"value":1,"x":17,"y":16},{"id":60,"value":1,"x":3,"y":17},{"id":61,"value":1,"x":7,"y":17},{"id":62,"value":1,"x":12,"y":17},{"id":63,"value":1,"x":16,"y":17}],"mode":"light","players":[{"moveOn":"blank","player_id":0,"point":0,"sleep":0,"status":"alive","team_id":1150,"x":0,"y":4},{"moveOn":"blank","player_id":1,"point":0,"sleep":0,"status":"alive","team_id":1150,"x":19,"y":4},{"moveOn":"blank","player_id":2,"point":0,"sleep":0,"status":"alive","team_id":1150,"x":0,"y":9},{"moveOn":"blank","player_id":3,"point":0,"sleep":0,"status":"alive","team_id":1150,"x":19,"y":9},{"moveOn":"blank","player_id":4,"point":0,"sleep":0,"status":"alive","team_id":1123,"x":2,"y":2},{"moveOn":"blank","player_id":5,"point":0,"sleep":0,"status":"alive","team_id":1123,"x":11,"y":2},{"moveOn":"blank","player_id":6,"point":0,"sleep":0,"status":"alive","team_id":1123,"x":8,"y":17},{"moveOn":"blank","player_id":7,"point":0,"sleep":0,"status":"alive","team_id":1123,"x":17,"y":17}],"round_id":3,"teams":[{"point":0,"remain_life":4,"team_id":1150},{"point":0,"remain_life":4,"team_id":1123}]}
+01946{"block_name":"round","effects":{"distroy_mines":[{"id":32},{"id":34},{"id":61},{"id":63}]},"mines":[{"id":33,"value":1,"x":7,"y":2},{"id":35,"value":1,"x":16,"y":2},{"id":36,"value":1,"x":2,"y":3},{"id":37,"value":1,"x":17,"y":3},{"id":38,"value":1,"x":2,"y":7},{"id":39,"value":1,"x":17,"y":7},{"id":40,"value":2,"x":8,"y":8},{"id":41,"value":1,"x":9,"y":8},{"id":42,"value":1,"x":10,"y":8},{"id":43,"value":2,"x":11,"y":8},{"id":44,"value":1,"x":8,"y":9},{"id":45,"value":5,"x":9,"y":9},{"id":46,"value":5,"x":10,"y":9},{"id":47,"value":1,"x":11,"y":9},{"id":48,"value":1,"x":8,"y":10},{"id":49,"value":5,"x":9,"y":10},{"id":50,"value":5,"x":10,"y":10},{"id":51,"value":1,"x":11,"y":10},{"id":52,"value":2,"x":8,"y":11},{"id":53,"value":1,"x":9,"y":11},{"id":54,"value":1,"x":10,"y":11},{"id":55,"value":2,"x":11,"y":11},{"id":56,"value":1,"x":2,"y":12},{"id":57,"value":1,"x":17,"y":12},{"id":58,"value":1,"x":2,"y":16},{"id":59,"value":1,"x":17,"y":16},{"id":60,"value":1,"x":3,"y":17},{"id":62,"value":1,"x":12,"y":17}],"mode":"light","players":[{"moveOn":"blank","player_id":0,"point":0,"sleep":0,"status":"alive","team_id":1150,"x":0,"y":3},{"moveOn":"blank","player_id":1,"point":0,"sleep":0,"status":"alive","team_id":1150,"x":19,"y":3},{"moveOn":"blank","player_id":2,"point":0,"sleep":0,"status":"alive","team_id":1150,"x":0,"y":8},{"moveOn":"blank","player_id":3,"point":0,"sleep":0,"status":"alive","team_id":1150,"x":19,"y":8},{"moveOn":"blank","player_id":4,"point":1,"sleep":0,"status":"alive","team_id":1123,"x":3,"y":2},{"moveOn":"blank","player_id":5,"point":1,"sleep":0,"status":"alive","team_id":1123,"x":12,"y":2},{"moveOn":"blank","player_id":6,"point":1,"sleep":0,"status":"alive","team_id":1123,"x":7,"y":17},{"moveOn":"blank","player_id":7,"point":1,"sleep":0,"status":"alive","team_id":1123,"x":16,"y":17}],"round_id":4,"teams":[{"point":0,"remain_life":4,"team_id":1150},{"point":4,"remain_life":4,"team_id":1123}]}

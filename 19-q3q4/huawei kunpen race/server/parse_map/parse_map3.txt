@@ -1,0 +1,8 @@
+00092
+{
+  "block_name":"leg_end",
+  "teams":[
+    {"point":5,"team_id":1134},
+    {"point":142,"team_id":1123}
+  ]
+}

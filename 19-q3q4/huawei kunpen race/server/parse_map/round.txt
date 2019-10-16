@@ -1,0 +1,12 @@
+{
+    'msg_name': 'round', 
+    'msg_data': {
+        'round_id': 119, 
+        'mode': 'think', 
+        'power': [{'point': 1, 'x': 12, 'y': 2}, {'point': 1, 'x': 17, 'y': 16}, {'point': 1, 'x': 7, 'y': 17}, {'point': 1, 'x': 16, 'y': 17}], 
+        'players': [
+            {'id': 4, 'score': 2, 'sleep': 0, 'team': 1123, 'x': 12, 'y': 2},
+            {'id': 5, 'score': 1, 'sleep': 0, 'team': 1123, 'x': 11, 'y': 2}, {'id': 6, 'score': 1, 'sleep': 0, 'team': 1123, 'x': 8, 'y': 17}, {'id': 7, 'score': 1, 'sleep': 0, 'team': 1123, 'x': 16, 'y': 16}], 
+        'teams': [{'id': 1123, 'point': 5, 'remain_life': 4}, {'id': 1157, 'point': 0, 'remain_life': 4}]
+    }
+}
