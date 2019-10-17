@@ -252,6 +252,7 @@ QUnit.test("getUsedValueArrayAt", assert => {
         assert.equal( usedValue.length, 9, "Used Value Array length is right");
     }
 });
+
 /*=============== Board Test ===============*/
 
 QUnit.module("Performance", {

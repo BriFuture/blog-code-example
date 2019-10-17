@@ -104,25 +104,25 @@ class Utils {
     static getRandomValue(params) {
         params = ( params === undefined ) ? {} : params;
 
-        let basic = params.basic, exclude = params.exclude;
-        if( basic === undefined ) {
-            basic = this.genBasicArray();
-            // let basic = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-        }
-        let exCount = 0;
+        let basic = params.basic;
+        let exclude = params.exclude;
+
         if( exclude && exclude.length > 0 ) {
-            basic.forEach( (element, index) => {
-                if( exclude.includes(element) ) {
-                    basic[index] = 100;  // 移除要排除的数字
-                    exCount++;
+            basic = [];
+            for(let i = 1; i <= 9; i += 1) {
+                if(exclude.indexOf(i) == -1) {
+                    basic.push(i)
                 }
-            });
+            }
+            // console.log("getR", basic, exclude)
+
             basic.sort( (a, b) => {
                 return a > b;  // 从小到大顺序排列
             });
-            for (let i = 0; i < exCount; i++) {
-                basic.pop();
-            }
+
+        } else if( basic === undefined ) {
+            basic = this.genBasicArray();
+            // let basic = [1, 2, 3, 4, 5, 6, 7, 8, 9];
         }
 
         if( !params.keepOrder )
@@ -227,7 +227,10 @@ class Choice {
      */
     next() {
         this.attemptIndex++;
-        return this.choiceSet[this.attemptIndex];
+        if(this.attemptIndex <= this.choiceSet.length) {
+            return this.choiceSet[this.attemptIndex];
+        }
+        return undefined;
     }
 }
 
@@ -254,8 +257,9 @@ class Board {
         // Utils.printAll(this);
  
         let used, unused, grid, index;
-        for(let i = 1; i < 9; i++) {
-            for(let j = 0; j < 9; j++) {
+        let temp = 0;
+        for(let i = 1; i < 9; i += 1) {
+            for(let j = 0; j < 9; j += 1) {
                 grid = this.grids[i*9+j];
                 // process.stdout.write( `i=${i}, j=${j}.  `);
                 if( grid.choice === undefined ) {
@@ -264,9 +268,12 @@ class Board {
                     grid.choice = new Choice( unused );
                 }
                 index = this.populateGrid(grid);
+                // console.log(used, unused, i, j, index)
                 i = index.i; 
                 j = index.j;
+                temp += 1;
             }
+
         }
     }
 
