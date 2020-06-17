@@ -26,7 +26,7 @@
 #else
 #define MaxThreadNum 4
 // WorkerNum 不能加快速度，但是可以均分任务
-#define DefaultWorkerNum 12
+#define DefaultWorkerNum 24
 
 #define DataInputFile "/data/test_data.txt"
 #define DataOutputFile "/projects/student/result.txt"
@@ -94,6 +94,7 @@ void readfile()
 	size_t secondPos = 0;
 	size_t iter = 0;
 	vecLines.resize(VecLinesPreserveSize); // reserve size
+	
 	size_t fileSize;
 	char *mappedFileAddr;
 #ifdef ON_WIN
@@ -131,7 +132,6 @@ void readfile()
 	size_t bufferStart = 0;
 	size_t bufferEnd = 0;
 	char buffer[40];
-	
 	while (true)
 	{
 		readedBytes = newLineIdx;
@@ -173,10 +173,6 @@ void readfile()
 
 	vecLines.resize(iter);
 	vecLines.shrink_to_fit();
-
-	//std::copy(graphNodeId.begin(), graphNodeId.end(), Pub_graphNoId.begin());
-	//std::sort(Pub_graphNoId.begin(), Pub_graphNoId.end());
-
 	vecLines2.resize(iter);
 	std::copy(vecLines.begin(), vecLines.end(), vecLines2.begin());
 #ifdef ON_WIN
@@ -321,13 +317,13 @@ protected:
 		circle.resize(_maxSize);
 	}
 public:
-	vector<array<int, _Size>> circle;
 	/** 检测出的环数，不包含重复 */
 	int _circleCount = 0;
 	int _maxSize;
+	bool _inited = false;
+	vector<array<int, _Size>> circle;
 	// todo 尽可能给大环增加size
 	int _incSize = 0;
-	bool _inited = false;
 }
 #ifndef _MSC_VER
 __attribute__((aligned(16)))
@@ -337,77 +333,7 @@ __attribute__((aligned(16)))
 #pragma pack(pop)
 #endif
 
-class Cycle7 : public _Circle<7> {
-public:
-	Cycle7(int initSize, int incSize): _Circle(initSize, incSize) {
-
-	}
-	inline void start() {
-		//array<int, 7> &tmpCircle = circle[_circleCount];
-		//tmpCircle[0] = L; // L 节点
-		//tmpCircle[1] = P1; // P1
-		//tmpCircle[2] = N1; // P2
-	}
-	inline void addCircle(int *start) {
-		if (!_inited) {
-			circle.resize(_maxSize);
-			_inited = true;
-		}
-		
-		array<int, 7> &tmpCircle = circle[_circleCount];
-		int it = 0;
-		tmpCircle[0] = start[0]; // L 节点
-		tmpCircle[1] = start[1]; // P1
-		tmpCircle[2] = start[2]; // P2
-		tmpCircle[3] = start[3]; // P3
-		tmpCircle[4] = start[6]; // N3
-		tmpCircle[5] = start[5]; // N3
-		tmpCircle[6] = start[4]; // N3
-		
-		_circleCount += 1;
-		if (_circleCount >= _maxSize) {
-			increaseSize();
-		}
-	}
-};
 // ============ end of CircleContainer ================
-
-enum NodeGroup {
-	GroupNone = 0x00,
-	Group1 = 0x01,
-	Group2 = 0x02,
-	Group3 = 0x04,
-	Group4 = 0x08,
-	Group5 = 0x10,
-	Group6 = 0x20,
-	Group7 = 0x40,
-	Group8 = 0x80,
-	Group9 = 0x100,
-	Group10 = 0x200,
-	Group11 = 0x400,
-	Group12 = 0x800,
-	Group13 = 0x1000,
-	Group14 = 0x2000,
-	Group15 = 0x4000,
-	Group16 = 0x8000,
-	Group17 = 0x10000,
-	Group18 = 0x20000,
-	Group19 = 0x40000,
-	Group20 = 0x80000,
-	Group21 = 0x100000,
-	Group22 = 0x200000,
-	Group23 = 0x400000,
-	Group24 = 0x800000,
-	Group25 = 0x1000000,
-	Group26 = 0x2000000,
-	Group27 = 0x4000000,
-	Group28 = 0x8000000,
-	Group29 = 0x10000000,
-	Group30 = 0x20000000,
-	Group31 = 0x40000000,
-	Group32 = 0x80000000,
-	GroupAll = 0xffffffff,
-};
 
 #ifdef _MSC_VER
 #pragma pack(push, 16)
@@ -421,8 +347,7 @@ struct SGraphNode {
 	vector<SGraphNode *> v_next_1;
 	int id; // id 表示文件中的转账人
 	int idx; // 表示在容器中的序号，调试用
-	int group;
-
+	
 	inline int degree() {
 		return v_next_1.size() + v_last_1.size();
 	}
@@ -431,14 +356,22 @@ struct SGraphNode {
 		if (v_last_1.size() == 0) { return true; }
 		return (*v_last_1.rbegin())->id < id;
 	}
+	inline int last1MaxId() {
+		// last is reversed
+		if (v_last_1.size() == 0) { return -1; }
+		return (*v_last_1.rbegin())->id;
+	}
 	inline bool next1MaxLess() {
 		if (v_next_1.size() == 0) { return true; }
 		return (*v_next_1.rbegin())->id < id;
 	}
+	inline int next1MaxId() {
+		if (v_next_1.size() == 0) { return -1; }
+		return (*v_next_1.rbegin())->id;
+	}
 
 	SGraphNode()
 	{
-		group = GroupNone;
 		v_last_1.reserve(MaxRecverCount * 2);
 		v_next_1.reserve(MaxRecverCount * 2);
 	}
@@ -466,13 +399,25 @@ struct WorkNode {
 	size_t end;
 };
 
+// ============== end of structure definitions ======
+
+#define MaxNodeCount 100000
+size_t Pub_graphSize = 0;
+vector<SGraphNode> Pub_nodes;
+
+struct SGraphNodeConn2{
+	unordered_map<int, vector<int>> umv2;
+	//vector<int> next2;
+};
+#ifdef USE_NODE_LAYER_2
+vector<SGraphNodeConn2> Pub_snodeUMV2; // 表示第2级的 next 集合,不需要重复，序号和 Pub_nodes 序号相同
+#endif
+
 struct PathN3 {
 	int paths1; // skip is 2 now
 	int paths2; // skip is 2 now
-	int toId;
-	PathN3() {
-		//toId = INT32_MAX;
-	}
+	int toId = -1;
+	PathN3() {}
 	PathN3(int to, int p1, int p2) {
 		toId = to;
 		paths1 = p1;
@@ -485,63 +430,70 @@ __attribute__((aligned(8)))
 ;
 struct SPathCompare {
 
-	bool operator()(const PathN3 &p1, const PathN3 &p2) const {
-		return p1.toId < p2.toId;
-	}
-	bool operator()(const PathN3 &p1, int to) {
-		return p1.toId < to;
-	}
-	bool operator()(int to, const PathN3 &p1) {
-		return to < p1.toId;
-	}
+bool operator()(const PathN3 &p1, const PathN3 &p2) const {
+	return p1.toId < p2.toId;
+}
+bool operator()(const PathN3 &p1, int to) {
+	return p1.toId < to;
+}
+bool operator()(int to, const PathN3 &p1) {
+	return to < p1.toId;
+}
 } pathCompare;
-// ============== end of structure definitions ======
 
-#define MaxNodeCount 200000
-size_t Pub_graphSize = 0;
+template<class ForwardIt>
+inline void path_binary_find(ForwardIt &first, ForwardIt last, int value)
+{
+	first = std::lower_bound(first, last, value, pathCompare);
+	//if(pathCompare(value, *first)) // value < *first, not found
+	//	first = last;
+	//return first;
+}
 
+void path_binary_find(vector<PathN3> &path, vector<SGraphNode*> &nodes,
+	vector<PathN3>::iterator &first, vector<PathN3>::iterator &last)
+{
+	first = std::lower_bound(
+		path.begin(), path.end(), nodes[0]->id, pathCompare);
+	last = std::upper_bound(
+		path.begin(), path.end(), (*nodes.rbegin())->id, pathCompare);
+	if (std::distance(first, last) <= 0) {
+		first = path.end();
+	}
+	//return last;
+}
+
+// 一级的索引和 Pub_nodes 对应，二级表示到特定点的位置
+vector<vector<PathN3>> Pub_snodeUS3;
+#ifdef USE_NODE_LAST_3
+vector<vector<PathN3>> Pub_lastUS3;
+#endif
 unordered_map<int, int> idxMap; // id -> idx
 vector<WorkNode> Pub_workNodes;
 
-struct PubVariables {
-	vector<SGraphNode> nodes;
-	// 一级的索引和 nodes 对应，二级表示到特定点的位置
-	vector<vector<PathN3>> snodeUS3;
-	vector<vector<PathN3>> lastUS2;
-	vector<vector<PathN3>> nextUS2;
-	vector<SGraphNode *> rootNodes;
 
-	inline void resize() {
-		nextUS2.resize(Pub_graphSize);
-		lastUS2.resize(Pub_graphSize);
-		snodeUS3.resize(Pub_graphSize);
+/* 将 STransfer 结构体转变成邻接矢量 */
+void prepareGraphNode() {
+	// construct GraphNodes
 
-		rootNodes.reserve(200);
-	}
-	/* 将 STransfer 结构体转变成邻接矢量 */
-	void prepareGraphNode() {
-		// construct GraphNodes
-
-		int lastId = -1;
-		int iter = 0;
-		nodes.reserve(vecLines.size() << 2); // max 2 times of lines
-		for (auto it = Pub_graphNoId.begin(); it != Pub_graphNoId.end(); it++) {
-			if (lastId != *it) {
-				lastId = *it;
-				nodes.emplace_back();
-				SGraphNode &gn = nodes[iter];
-				gn.idx = iter;
-				gn.id = lastId;
-				idxMap[lastId] = iter;
-				iter += 1;
-			}
+	int lastId = -1;
+	int iter = 0;
+	Pub_nodes.reserve(vecLines.size() << 2); // max 2 times of lines
+	for (auto it = Pub_graphNoId.begin(); it != Pub_graphNoId.end(); it ++) {
+		if (lastId != *it) {
+			lastId = *it;
+			Pub_nodes.emplace_back();
+			SGraphNode &gn = Pub_nodes[iter];
+			gn.idx = iter;
+			gn.id = lastId;
+			idxMap[lastId] = iter;
+			iter += 1;
 		}
-		Pub_graphSize = iter;
-		nodes.resize(Pub_graphSize);
-	} // end of prepareGraphNode
+	}
+	Pub_graphSize = iter;
+	Pub_nodes.resize(Pub_graphSize);
+} // end of prepareGraphNode
 
-
-} pv;
 /* 准备 SGraphNode 图节点的下一级 next_1 */
 void *prepareGraphNode_n1(void *tid) {
 	int lastId = -1;
@@ -553,10 +505,10 @@ void *prepareGraphNode_n1(void *tid) {
 		if (lastId != line.t1) {
 			lastId = line.t1;
 			lastIdx = idxMap[lastId];
-			gn = &pv.nodes[lastIdx];
+			gn = &Pub_nodes[lastIdx];
 		}
 		// idxMap 找到 idx，然后找到地址
-		gn->v_next_1.push_back(&pv.nodes[idxMap[line.t2]]);
+		gn->v_next_1.push_back(&Pub_nodes[idxMap[line.t2]]);
 	}
 	vecLines.clear();
 	vecLines.shrink_to_fit();
@@ -567,15 +519,13 @@ void *prepareGraphNode_l1(void *tid) {
 	// 按照 recver 排序
 	sort(vecLines2.begin(), vecLines2.end(), sortTransferByRecver);
 	int lastId = -1;
-	int lastIdx;
 	SGraphNode *gn;
 	for (STransfer & line : vecLines2) {
 		if (lastId != line.t2) {
 			lastId = line.t2;
-			lastIdx = idxMap[lastId];
-			gn = &pv.nodes[lastIdx];
+			gn = &Pub_nodes[idxMap[lastId]];
 		}
-		gn->v_last_1.push_back(&pv.nodes[idxMap[line.t1]]);
+		gn->v_last_1.push_back(&Pub_nodes[idxMap[line.t1]]);
 	}
 	vecLines2.clear();
 	vecLines2.shrink_to_fit();
@@ -597,6 +547,9 @@ void prepareWork() {
 	unsigned char i;
 	size_t start = 0;
 	for (i = 0; i < WorkerNum; i++) {
+#ifdef MY_DEBUG
+		Pub_workNodes[i].debugid = i;
+#endif
 		Pub_workNodes[i].offset = start;
 		start = uniPartialSize + end;
 		end = start;
@@ -618,214 +571,6 @@ void prepareWork() {
 	// ------------ end work nodes ------------------
 }
 
-/* prepare 所有的Node全部准备完毕后就能检测环  */
-void prepareLayer2(size_t off) {
-	SGraphNode *nodeL = &pv.nodes[off];
-	if (nodeL->v_last_1.size() == 0 || nodeL->v_next_1.size() == 0)
-		return;
-	size_t i = 0;
-	size_t j = 0;
-	int sizeP1;
-	int nodeN2Id;
-	vector<PathN3> &sNodeL2 = pv.lastUS2[off];
-	SGraphNode *nodeN1; 
-	bool reservedN3 = false;
-	for (i = 0; i < nodeL->v_last_1.size(); i += 1) {
-		// push P1
-		nodeN1 = nodeL->v_last_1[i];
-		sizeP1 = nodeN1->v_last_1.size();
-
-		if (reservedN3 == false) {
-			reservedN3 = true;
-			sNodeL2.reserve(nodeL->v_last_1.size() * MaxRecverCount);
-		}
-		j = 0;
-		while (j < sizeP1) {
-			// push P2 (N1)
-			nodeN2Id = nodeN1->v_last_1[j]->id;
-			j++;
-			if (nodeN2Id == nodeL->id)
-			{
-				continue;
-			}
-			sNodeL2.emplace_back(nodeN2Id, nodeN1->id, 0);
-		} // end while N1(P2)
-	} // end while P1
-	std::sort(sNodeL2.begin(), sNodeL2.end(), pathCompare);
-
-	reservedN3 = false;
-	vector<PathN3> &sNodeN2 = pv.nextUS2[off];
-	for (i = 0; i < nodeL->v_next_1.size(); i += 1) {
-		// push P1
-		nodeN1 = nodeL->v_next_1[i];
-		sizeP1 = nodeN1->v_next_1.size();
-
-		if (reservedN3 == false) {
-			reservedN3 = true;
-			sNodeN2.reserve(nodeL->v_next_1.size() * MaxRecverCount);
-		}
-		j = 0;
-		while (j < sizeP1) {
-			// push P2 (N1)
-			nodeN2Id = nodeN1->v_next_1[j]->id;
-			j++;
-			if (nodeN2Id == nodeL->id)
-			{
-				continue;
-			}
-			sNodeN2.emplace_back(nodeN2Id, nodeN1->id, 0);
-		} // end while N1(P2)
-	} // end while P1
-	std::sort(sNodeN2.begin(), sNodeN2.end(), pathCompare);
-}
-
-void prepareLayer3(size_t off) {
-	SGraphNode *nodeL = &pv.nodes[off];
-	if (nodeL->v_last_1.size() == 0 || nodeL->v_next_1.size() == 0)
-		return;
-	size_t i = 0;
-	size_t j = 0;
-	int sizeP1;
-	vector<PathN3> &sNodeN3 = pv.snodeUS3[off];
-	vector<SGraphNode *>::iterator n3start;
-	vector<SGraphNode *>::iterator n3end;
-	SGraphNode *nodeP1;
-	SGraphNode *nodeN1;
-	bool reservedN3 = false;
-	int nodeLN1Size = nodeL->v_next_1.size();
-	int n3Count = 0;
-	//int CacheItem = CACHE_LINE_SIZE / sizeof(int);
-	for (i = 0; i < nodeLN1Size; i += 1) {
-		// push P1
-		nodeP1 = nodeL->v_next_1[i];
-		sizeP1 = nodeP1->v_next_1.size();
-		j = 0;
-		while (j < sizeP1) {
-			// push P2 (N1)
-			nodeN1 = nodeP1->v_next_1[j];
-			j++;
-			if (nodeN1 == nodeL)
-			{
-				continue;
-			}
-			if (reservedN3 == false) {
-				reservedN3 = true;
-				sNodeN3.resize(nodeLN1Size * MaxRecverCount * MaxRecverCount);
-			}
-			
-			n3end = nodeN1->v_next_1.end();
-			int np1id = nodeP1->id;
-			int nn1id = nodeN1->id;
-			for (n3start = nodeN1->v_next_1.begin(); n3start != n3end; n3start ++) { // vn3 可能包含 L
-				sNodeN3[n3Count].toId = (*n3start)->id;
-				sNodeN3[n3Count].paths1 = np1id;
-				sNodeN3[n3Count].paths2 = nn1id;
-				n3Count++;
-			} // end P2(P3)
-
-		} // end while N1(P2)
-	} // end while P1
-	sNodeN3.resize(n3Count);
-	std::sort(sNodeN3.begin(), sNodeN3.end(), pathCompare); // cost 1s on 100w data
-}
-
-array<int, 7> cycle7[3000000];
-void prepareTreeParts() {
-	SGraphNode *nodeL;  int nodeLP1Size;
-	SGraphNode *nodeP1; int nodeP1NSize;
-	SGraphNode *nodeP2; int nodeP2NSize;
-	SGraphNode *nodeP3; int nodeLN1Size;
-	SGraphNode *nodeN1; int nodeN1NSize;
-	SGraphNode *nodeN2; int nodeN2NSize;
-	SGraphNode *nodeN3;
-	int currentGroup = 0x01;
-	int ni;
-	int cycle7Count = 0;
-	for (ni = 0; ni < Pub_graphSize; ni++) {
-		nodeL = &pv.nodes[ni];
-		nodeLP1Size = nodeL->v_next_1.size();
-		nodeLN1Size = nodeL->v_last_1.size();
-		if (nodeLP1Size == 0 || nodeLN1Size == 0) {
-			continue;
-		}
-		currentGroup++;
-		pv.rootNodes.push_back(nodeL);
-		nodeL->group = currentGroup;
-		for (int j = 0; j < nodeLN1Size; j++) {
-			nodeN1 = nodeL->v_last_1[j];
-			nodeN1->group = currentGroup;
-			nodeN1NSize = nodeN1->v_last_1.size();
-			for (int k = 0; k < nodeN1NSize; k++) {
-				nodeN2 = nodeN1->v_last_1[k];
-				if (nodeN2->id <= nodeL->id) { continue; }
-				nodeN2->group = currentGroup;
-				nodeN2NSize = nodeN2->v_last_1.size();
-				for (int l = 0; l < nodeN2NSize; l++) {
-					nodeN3 = nodeN2->v_last_1[l];
-					if (nodeN3->id <= nodeL->id || nodeN3->id == nodeN1->id) 
-					{ continue; }
-					nodeN3->group = currentGroup;
-				}
-			}
-		}
-		
-		for (int j = 0; j < nodeLP1Size; j++) {
-			nodeP1 = nodeL->v_next_1[j];
-			if (nodeP1->id == nodeL->id) {
-				continue;
-			}
-			nodeP1->group = currentGroup;
-			nodeP1NSize = nodeP1->v_next_1.size();
-			for (int k = 0; k < nodeP1NSize; k++) {
-				nodeP2 = nodeP1->v_next_1[k];
-				if (nodeP2->id <= nodeL->id) { continue; }
-				nodeP2->group = currentGroup;
-				nodeP2NSize = nodeP2->v_next_1.size();
-				for (int l = 0; l < nodeP2NSize; l++) {
-					nodeP3 = nodeP2->v_next_1[l];
-					if (nodeP3->id <= nodeL->id || nodeP3->id == nodeP1->id)
-					{ continue; }
-					nodeP3->group = currentGroup;
-					nodeN2NSize = nodeP3->v_next_1.size();
-					for (int m = 0; m < nodeN2NSize; m++) {
-						nodeN3 = nodeP3->v_next_1[m];
-						if (nodeN3->group != currentGroup || nodeN3->id <= nodeL->id
-							|| nodeN3->id == nodeP1->id || nodeN3->id == nodeP2->id) {
-							continue;
-						}
-						for (int n = 0; n < nodeLN1Size; n++) {
-							nodeN1 = nodeL->v_last_1[n];
-							if (nodeN1->id <= nodeL->id || nodeN1->id == nodeP1->id
-								|| nodeN1->id == nodeP2->id || nodeN1->id == nodeP3->id) {
-								continue;
-							}
-							
-							for (int p = 0; p < nodeN1->v_last_1.size(); p++) {
-							}
-							//vector<PathN3> &pathN1 = pv.lastUS2[nodeN1->idx];
-							//for (int p = 0; p < pathN1.size(); p++) {
-							//	if (pathN1[p].toId == nodeN3->id) {
-							//		/*cycle7[cycle7Count][0] = nodeL->id;
-							//		cycle7[cycle7Count][1] = nodeP1->id;
-							//		cycle7[cycle7Count][2] = nodeP2->id;
-							//		cycle7[cycle7Count][3] = nodeP3->id;
-							//		cycle7[cycle7Count][4] = pathN1[p].toId;
-							//		cycle7[cycle7Count][5] = pathN1[p].paths1;
-							//		cycle7[cycle7Count][6] = nodeN1->id;*/
-							//		cycle7Count++;
-							//	}
-							//}
-						}
-					}
-				}
-
-			}
-		}
-	}
-	cout << "[D] cycle7: " << cycle7Count << endl;
-}
-
-
 class Intersection {
 public:
 	Intersection() {
@@ -843,11 +588,31 @@ public:
 		start = v_intersectionL1.begin();
 	}
 
+
+#if defined(USE_NODE_LAST_2) && 0
+	//std::vector<SGraphNode *> s_intersection;
+	std::vector<SGraphNode *> v_intersectionL2;
+	std::vector<SGraphNode *>::iterator intersectionL2Start;
+	std::vector<SGraphNode *>::iterator intersectionL2End;
+	//  检测 n1->last_2 - 与 n2->next_1 交集
+	inline void dis3NodeItersection(SGraphNode *n1, SGraphNode *n2) {
+		intersectionL2End = std::set_intersection(sN1->s_last_2.begin(),
+			sN1->s_last_2.end(),
+			n2->v_next_1.begin(),
+			n2->v_next_1.end(),
+			v_intersectionL2.begin());
+	}
+#endif
 public:
+#ifdef USE_NODE_LAYER_2
+	std::vector<int>::iterator start;
+	std::vector<int>::iterator end;
+#else
 	std::vector<SGraphNode *>::iterator start;
 	std::vector<SGraphNode *>::iterator end;
 	// max 50 times compare
 	std::vector<SGraphNode *> v_intersectionL1;
+#endif
 };
 
 /* 用于储存可能构成环的顶点和 Connectivitiy 对象
@@ -865,102 +630,182 @@ class CircleChecker {
 #define NodeNPos(i) (i * 2)
 /* 1 <= i <= 3 */
 #define NodePPos(i) (i * 2 - 1)
-	/*NodeId 不能用临时变量替换，但Node可以*/
 #define NodePId(i) NodeIds[NodePPos(i)]
 #define NodeNId(i) NodeIds[NodeNPos(i)]
 #define NodeP(i) Node[NodePPos(i)]
 #define NodeN(i) Node[NodeNPos(i)]
+
+#define Circles(s) circles[s - MinCircleSize]
+#define RingCheck(s) shouldRingCheck[s - 5] // 只有 5 和 6 需要进行 RingCheck
+#define BFind binary_find
 public:
-	
+	enum RingCheckStatus {
+		CheckedBypass = 0x0, //  预检查过，不可能构成环
+		NotChecked = 0x1, // 尚未检查过
+		CheckedPass = 0x2, // 预检查过，可能构成环
+	};
 	/* start > 0, 0 表示 NodeL 节点，(包含start）
 	end > 0，大于 0 表示 P 节点 （包含end）
 	 -- start 和 end 都会加上响应的偏移 --
 	2，3，4 就是检测大小为 3 的环是否存在 
 	环存在的必要条件是 end 的 next 节点中 存在 start
 	*/
+	void _check3() {
+		// L- P1 -N1
+		auto np = Node[NodeNPos(1)]->v_next_1;
+		if (binary_search(np.begin(),
+			np.end(), NodeL)) {
+			Circles(3)->addCircle(NodeIds);
+		}
+	}
+
+	/* prepare 所有的Node全部准备完毕后就能检测环，但是 3环比较特殊，在本阶段就可以检测 */
+	void prepareLayer_2(size_t off) {
+		NodeL = &Pub_nodes[off];
+		if (NodeL->v_last_1.size() == 0) return; 
+		if (NodeL->v_next_1.size() == 0) return;
+		NodeLId = NodeL->id;
+
+		size_t i = 0;
+		size_t j = 0;
+		vector<SGraphNode *>::iterator gn2;
+		vector<SGraphNode *>::iterator vecEnd;
+		bool reservedN3 = false;
+		vector<SGraphNode*>::iterator n3start;
+		vector<SGraphNode*>::iterator n3end;
+		int sizeP1;
+#ifdef USE_NODE_LAST_3
+		vector<PathN3> &sNodeL2 = Pub_lastUS3[off];
+		for (i = 0; i < NodeL->v_last_1.size(); i += 1) {
+			// push P1
+			NodeN(1) = NodeL->v_last_1[i];
+			NodeNId(1) = NodeN(1)->id;
+			sizeP1 = NodeN(1)->v_last_1.size();
+
+			if (reservedN3 == false) {
+				reservedN3 = true;
+				sNodeL2.reserve(NodeL->v_last_1.size() *
+					MaxRecverCount);
+			}
+			//if (sizeP1 == 0) continue;
+			NodeIdx[NodeNPos(2)] = 0;
+			while (NodeIdx[NodeNPos(2)] < sizeP1) {
+				// push P2 (N1)
+				NodeN(2) = NodeN(1)->v_last_1[NodeIdx[NodeNPos(2)]];
+				NodeIdx[NodeNPos(2)] ++;
+				if (NodeN(2) == NodeL)
+				{ continue; }
+				NodeNId(2) = NodeN(2)->id;
+				sNodeL2.emplace_back(NodeNId(2), NodeNId(1), 0);
+			} // end while N1(P2)
+			
+		} // end while P1
+		std::sort(sNodeL2.begin(), sNodeL2.end(), pathCompare);
+#endif
+		reservedN3 = false;
+		vector<PathN3> &sNodeN3 = Pub_snodeUS3[off];
+		for (i = 0; i < NodeL->v_next_1.size(); i += 1) {
+			// push P1
+			NodeP(1) = NodeL->v_next_1[i];
+			NodePId(1) = NodeP(1)->id;
+			sizeP1 = NodeP(1)->v_next_1.size();
+		
+			//if (sizeP1 == 0) continue;
+			NodeIdx[NodeNPos(1)] = 0;
+			while (NodeIdx[NodeNPos(1)] < sizeP1) {
+				// push P2 (N1)
+				NodeN(1) = NodeP(1)->v_next_1[NodeIdx[NodeNPos(1)]];
+				NodeIdx[NodeNPos(1)] ++;
+				if (Node[NodeNPos(1)] == NodeL) 
+				{ continue; }
+				NodeIds[NodeNPos(1)] = Node[NodeNPos(1)]->id;
+				if (NodeIds[NodeNPos(1)] > NodeLId &&
+					NodeIds[NodePPos(1)] > NodeLId )
+				{
+					_check3(); // ringsize == 3
+				}
+				if (reservedN3 == false) {
+					reservedN3 = true;
+					sNodeN3.reserve(NodeL->v_next_1.size() *
+						MaxRecverCount * MaxRecverCount);
+				}
+				n3start = Node[NodeNPos(1)]->v_next_1.begin();
+				n3end   = Node[NodeNPos(1)]->v_next_1.end();
+				while(n3start != n3end) { // vn3 可能包含 L 
+					sNodeN3.emplace_back((*n3start)->id, NodePId(1), NodeNId(1));
+					n3start++;
+				} // end P2(P3)
+			} // end while N1(P2)
+			
+		} // end while P1
+		std::sort(sNodeN3.begin(), sNodeN3.end(), pathCompare);
+		//sNodeN3.erase(std::unique(sNodeN3.begin(), sNodeN3.end()), sNodeN3.end());
+	}
 	/* 1 <= i <= 6 */
-	/* 检测环 4 5 6 7的情况，并将其保存到数组中 DFS */ 
+/* i 表示数组序号，第1层将会修改 Node[1] 的值
+@param node
+@param i 为 1-6
+@return True 表示 Pid 比 Lid 小，或者其它 需要过滤的情况
+*/
+	/* 检测环 4 5 的情况，并将其保存到数组中 DFS */ 
 	void run(size_t off) {
-		//return;
-		NodeL = &pv.nodes[off];
+		NodeL = &Pub_nodes[off];
 		if (NodeL->last1MaxLess() || NodeL->next1MaxLess()) 
 			return;
 		NodeLId = NodeL->id;
-		size_t i = 0, j = 0;
-		size_t iend = NodeL->v_next_1.size();
-		size_t jend = NodeL->v_last_1.size();
-		while (i < iend) {
+		for (auto nodeP1 : NodeL->v_next_1) {
 			// p layer 1
-			NodeP(1) = NodeL->v_next_1[i];
-			i++;
-			NodePId(1) = NodeP(1)->id;
-			if (NodePId(1) < NodeLId)  // P1 不会和 L 相同
+			NodeP(1) = nodeP1;
+			NodeIds[NodePPos(1)] = NodeP(1)->id;
+			if (NodeIds[NodePPos(1)] < NodeLId)  // P1 不会和 L 相同
 			{ continue; }
-			_run5();
-			_run6();
-			j = 0;
-			while (j < jend) {
+			for (auto nodeN1 : NodeL->v_last_1) {
 				// push n layer -1
-				NodeN(1) = NodeL->v_last_1[j];
-				j++;
-				NodeNId(1) = NodeN(1)->id;
-				if (NodeNId(1) < NodeLId || NodeNId(1) == NodePId(1))
+				NodeN(1) = nodeN1;
+				NodeIds[NodeNPos(1)] = NodeN(1)->id;
+				if (NodeIds[NodeNPos(1)] < NodeLId ||
+					NodeIds[NodeNPos(1)] == NodeIds[NodePPos(1)])
 				{ continue; }
-				if (binary_search(NodeN(1)->v_last_1.begin(), NodeN(1)->v_last_1.end(), NodeP(1))) {
-					circles[0]->addCircle(NodeIds);
-				}
 				_inter1.dis2Node(NodeP(1), NodeN(1));
 				while (_inter1.start != _inter1.end) {
-					NodePId(2) = (*_inter1.start)->id;
-					if (NodePId(2) > NodeLId) {
-						circles[1]->addCircle(NodeIds); // ringsize == 4
+#ifdef USE_NODE_LAYER_2
+					NodeIds[NodePPos(2)] = *_inter1.start;
+#else
+					NodeIds[NodePPos(2)] = (*_inter1.start)->id;
+#endif
+					if (NodeIds[NodePPos(2)] > NodeLId) {
+						Circles(4)->addCircle(NodeIds); // ringsize == 4
 					}
 					_inter1.start++;
 				} // end of RingCheck 4
+				NodeIdx[NodePPos(2)] = 0;
+				_run7(); // cost 3.7s seconds/100w data 1core
+				//_run5();
 			} // end of while Node N Idx(1) n layer 1
-		} // end of Node P Idx(1) p layer 1
-		i = 0;
-		while (i < iend) {
-			// p layer 1
-			NodeP(1) = NodeL->v_next_1[i];
-			i++;
-			NodePId(1) = NodeP(1)->id;
-			if (NodePId(1) < NodeLId)  // P1 不会和 L 相同
-			{ continue; }
-			j = 0;
-			while (j < jend) {
-				// push n layer -1
-				NodeN(1) = NodeL->v_last_1[j];
-				j++;
-				NodeNId(1) = NodeN(1)->id;
-				if (NodeNId(1) < NodeLId || NodeNId(1) == NodePId(1))
-				{ continue; }
-				_run7(); // cost 1.6s seconds/100w data 1core
-			} // end of while Node N Idx(1) n layer 1
+			_run5();
+			_run6();
 		} // end of Node P Idx(1) p layer 1
 	} // end method run
 
 	// process layer >= 2, for example P2-N1 check ring size 4
 	void _run5() {
-		vector<PathN3> &vn3 = pv.snodeUS3[NodeP(1)->idx];
+		vector<PathN3> &vn3 = Pub_snodeUS3[NodeP(1)->idx];
 		vector<SGraphNode *> &vl2 = NodeL->v_last_1;
 		vector<PathN3>::iterator vn3start = vn3.begin();
 		vector<PathN3>::iterator vn3end = vn3.end();
-		vector<PathN3>::iterator tf2;
 		vector<SGraphNode *>::iterator vl2start = vl2.begin();
 		vector<SGraphNode *>::iterator vl2end = vl2.end();
 		vector<SGraphNode *>::iterator te2;
-		vector<SGraphNode *>::iterator tf1;
 		while (vl2start != vl2end && vn3start != vn3end) {
-			if ((*vl2start)->id > (*vn3start).toId) {
-				vn3start++;
-			}
-			else if ((*vl2start)->id < (*vn3start).toId) {
+			if ((*vl2start)->id < (*vn3start).toId) {
 				vl2start++;
 			}
+			else if ((*vl2start)->id > (*vn3start).toId) {
+				vn3start++;
+			}
 			else {
-				tf2 = vn3start;
-				tf1 = vl2start;
+				auto tf2 = vn3start;
+				auto tf1 = vl2start;
 				while (tf2 != vn3end && (*tf2).toId == (*vn3start).toId) {
 					tf2++;
 				}
@@ -983,7 +828,7 @@ public:
 							) {
 							continue;
 						}
-						circles[2]->addCircle(NodeIds);
+						Circles(5)->addCircle(NodeIds);
 					}
 					vn3start++;
 				}
@@ -992,25 +837,23 @@ public:
 		}
 	}
 	void _run6() { 
-		vector<PathN3> &vn3 = pv.snodeUS3[NodeP(1)->idx];
-		vector<PathN3> &vl2 = pv.lastUS2[NodeL->idx];
+		vector<PathN3> &vn3 = Pub_snodeUS3[NodeP(1)->idx];
+		vector<PathN3> &vl2 = Pub_lastUS3[NodeL->idx];
 		vector<PathN3>::iterator vn3start = vn3.begin();
 		vector<PathN3>::iterator vn3end = vn3.end();
 		vector<PathN3>::iterator vl2start = vl2.begin();
 		vector<PathN3>::iterator vl2end = vl2.end();
 		vector<PathN3>::iterator te2;
-		vector<PathN3>::iterator tf2;
-		vector<PathN3>::iterator tf1;
 		while (vl2start != vl2end && vn3start != vn3end) {
-			if ((*vl2start).toId > (*vn3start).toId) {
-				vn3start++;
-			}
-			else if ((*vl2start).toId < (*vn3start).toId) {
+			if ((*vl2start).toId < (*vn3start).toId) {
 				vl2start++;
 			}
+			else if ((*vl2start).toId > (*vn3start).toId) {
+				vn3start++;
+			}
 			else {
-				tf2 = vn3start;
-				tf1 = vl2start;
+				auto tf2 = vn3start;
+				auto tf1 = vl2start;
 				while (tf2 != vn3end && (*tf2).toId == (*vn3start).toId) {
 					tf2++;
 				}
@@ -1034,7 +877,7 @@ public:
 							) {
 							continue;
 						}
-						circle6.addCircle(NodeIds);
+						Circles(6)->addCircle(NodeIds);
 					}
 					vn3start++;
 				}
@@ -1042,28 +885,26 @@ public:
 			}
 		}
 	} // end of function _run6
-	
 	void _run7() { 
 		//  当前 N1 P1 都已经确定，通过 P1 和 N1 确定 N3，然后确定整个环
-		vector<PathN3> &vn3 = pv.snodeUS3[NodeP(1)->idx];
-		vector<PathN3> &vl2 = pv.lastUS2[NodeN(1)->idx];
+		///*
+		vector<PathN3> &vn3 = Pub_snodeUS3[NodeP(1)->idx];
+		vector<PathN3> &vl2 = Pub_lastUS3[NodeN(1)->idx];
 		vector<PathN3>::iterator vn3start = vn3.begin();
 		vector<PathN3>::iterator vn3end = vn3.end();
 		vector<PathN3>::iterator vl2start = vl2.begin();
 		vector<PathN3>::iterator vl2end = vl2.end();
 		vector<PathN3>::iterator te2;
-		vector<PathN3>::iterator tf2;
-		vector<PathN3>::iterator tf1;
 		while (vl2start != vl2end && vn3start != vn3end) {
-			if ((*vl2start).toId > (*vn3start).toId) {
-				vn3start++; // vl2begin > vn3begin
-			}
-			else if ((*vl2start).toId < (*vn3start).toId) {
+			if ((*vl2start).toId < (*vn3start).toId) {
 				vl2start++;
 			}
+			else if ((*vl2start).toId > (*vn3start).toId) {
+				vn3start++;
+			}
 			else {
-				tf2 = vn3start;
-				tf1 = vl2start;
+				auto tf2 = vn3start;
+				auto tf1 = vl2start;
 				while (tf2 != vn3end && (*tf2).toId == (*vn3start).toId) {
 					tf2++;
 				}
@@ -1072,25 +913,21 @@ public:
 				}
 				while(vn3start < tf2) {
 					te2 = vl2start;
-					NodePId(2) = (*vn3start).paths1;
-					NodePId(3) = (*vn3start).paths2;
-					NodeNId(3) = (*vn3start).toId;
-					if (NodeNId(3) <= NodeLId || NodeNId(3) == NodePId(1)
-						|| NodeNId(3) == NodePId(2) || NodeNId(3) == NodeNId(1)
-						|| NodePId(3) <= NodeLId || NodeNId(1) == NodePId(3)
-						|| NodeNId(1) == NodePId(2)) {
-						vn3start++;
-						continue;
-					}
 					while(te2 < tf1) {
 						NodeNId(2) = (*te2).paths1;
+						NodeNId(3) = (*te2).toId;
+						NodePId(2) = (*vn3start).paths1;
+						NodePId(3) = (*vn3start).paths2;
 						te2++;
-						if (NodeNId(2) <= NodeLId
-							|| NodePId(2) <= NodeLId ) {
+						if (NodeNId(2) <= NodeLId || NodeNId(3) <= NodeLId
+							|| NodePId(2) <= NodeLId || NodePId(3) <= NodeLId) {
 							continue;
 						}
-						if (NodeNId(2) == NodePId(1) || NodeNId(2) == NodePId(2)
-							|| NodeNId(2) == NodePId(3)
+						if (NodeNId(1) == NodePId(2) || NodeNId(1) == NodePId(3)
+							|| NodeNId(3) == NodeNId(1)
+							|| NodeNId(2) == NodePId(1) || NodeNId(2) == NodePId(2)
+							|| NodeNId(2) == NodePId(3) || NodeNId(3) == NodePId(1)
+							|| NodeNId(3) == NodePId(2)
 							) {
 							continue;
 						}
@@ -1099,43 +936,83 @@ public:
 					vn3start++;
 				}
 				vl2start = tf1;
-			} // end of else
+			}
 		}
 	} // end of function _run7
 
+	/* @param ci  表示当前P节点的层数  pi 表示 上一级节点
+	使用 NodePPos 进行包裹 不过滤的条件是 Id 比 Lid 大，且栈中不存在相同的id
+	@param end 表示检查栈中是否存在相同元素的索引，默认为 ci
+	@return filter */
+	inline bool tryP(int ci) {
+		if (NodeIds[ci] > NodeLId) {
+			for (int s = 1; s < ci; s++) {
+				if (NodeIds[s] == NodeIds[ci]) {
+					return true;
+				}
+			}
+			return false;
+		}
+		return true;
+	}
+
 	Intersection _inter1; // 用于求交集
-	CircleChecker(): circle6(200000),
-		circle7(300000, 350000) 
+	CircleChecker(): circle6(200000), circle7(300000, 350000) 
 	{
+#if defined(MY_INFO) || defined(FULL_DATA_INFO)
+		id = 0;
+		groupId = 0;
+#endif
 		// preserve stack size
+		//NodeIds.resize(MaxCircleSize);
+		for (int i = 0; i < MaxCircleSize; i += 1) {
+			NodeIdx[i] = 0;
+		}
+		for (int i = 0; i < 2; i += 1) {
+			shouldRingCheck[i] = NotChecked;
+		}
+		
 	}
 	~CircleChecker() {}
 // ------------- 双向 stack -----------------
-	SGraphNode *Node[4]; // 0 存储 L 节点，1-3-5存储P节点，2-4-6存储N节点
+	SGraphNode *Node[MaxCircleSize]; // 0 存储 L 节点，1-3-5存储P节点，2-4-6存储N节点
 	//SShadowGraphNode *SNode[MaxCircleSize];
 	/* 尝试的索引,并非全局索引 */
+	int NodeIdx[MaxCircleSize];  // 这里的 idx 不是 Pub 数组中的序号，而是尝试的次数
+	RingCheckStatus shouldRingCheck[2]; // 3 - 4 - 7 不需要保存
 	/* 保存查找的索引，便于回溯 */
-	int NodeIds[8]; // 0 存储 L 节点id，1-3-5存储P节点Id，2-4-6存储N节点Id
+	int NodeIds[MaxCircleSize]; // 0 存储 L 节点id，1-3-5存储P节点Id，2-4-6存储N节点Id
 // ------------- end of stack -----------------
-
+//public:
+#if defined(MY_INFO) || defined(FULL_DATA_INFO)
+	int id;
+	int groupId;
+#endif
 
 // --------------- start of circles -----------------------
-	//_Circle<3> circle3;
-	//_Circle<4> circle4;
-	//_Circle<5> circle5;
-	_Circle<6> circle6;
-	Cycle7 circle7;
 	CircleInterface *circles[CircleSizeCount];
-	int _circleCount = 0;
-	//public:
+	_Circle<3> circle3;
+	_Circle<4> circle4;
+	_Circle<5> circle5;
+	_Circle<6> circle6;
+	_Circle<7> circle7;
 	void initCircles() {
-		circles[0] = new _Circle<3>();
-		circles[1] = new _Circle<4>();
-		circles[2] = new _Circle<5>();
+#if defined(FULL_DATA_INFO) && 0
+		cout << "Worker [" << id << " - " << groupId << "] Init Circles. " << endl;
+#endif
+		circles[0] = &circle3;
+		circles[1] = &circle4;
+		circles[2] = &circle5;
 		circles[3] = &circle6;
 		circles[4] = &circle7;
 	}
-
+	size_t sumCircles() {
+		size_t count = 0;
+		for (auto c : circles) {
+			count += c->size();
+		}
+		return count;
+	}
 	void cacheCircleCount() {
 		if(_circleCount != 0) { return; }
 		for (auto c : circles) {
@@ -1145,7 +1022,7 @@ public:
 			_circleCount += c->size();
 		}
 	}
-	
+	size_t _circleCount = 0;
 // --------------- end of circles -----------------------
 }
 #ifndef _MSC_VER
@@ -1156,7 +1033,7 @@ __attribute__((aligned(16)))
 #pragma pack(pop)
 #endif
 
-#if defined(FULL_DATA_INFO)
+#if defined(MY_INFO) || defined(FULL_DATA_INFO)
 #include <chrono> 
 #include <ctime>
 #include <iomanip>
@@ -1167,24 +1044,56 @@ static void printNow(const string &hint) {
 	std::cout << hint << std::put_time(std::localtime(&now), " %F %T") << endl;
 }
 #endif
+#ifdef USE_TESTER
+
+typedef int(*TestFunc)(void);
+
+static void TimeIt(TestFunc tf, int exe = 10) {
+	auto now = system_clock::to_time_t(system_clock::now());
+	std::cout << "[TIS] " << std::put_time(std::localtime(&now), "%F %T") << endl;
+	auto start = high_resolution_clock::now();
+	tf();
+	auto stop = high_resolution_clock::now();
+	now = system_clock::to_time_t(system_clock::now());
+	std::cout << "[TIE] " << std::put_time(std::localtime(&now), "%F %T") << endl;
+	auto duration = duration_cast<seconds>(stop - start);
+	double passed = duration.count();
+	if (passed < 1.0) {
+		auto mduration = duration_cast<milliseconds>(stop - start);
+		passed = mduration.count();
+		std::cout << "Elapsed: " << passed << " milliseconds " << endl << endl;
+	}
+	else {
+		auto mduration = duration_cast<milliseconds>(stop - duration - start);
+		std::cout << "Elapsed: " << passed << " seconds " 
+			<< mduration.count() << " ms " << endl << endl;
+
+	}
+}
+#endif // end USE_TESTER
 
 CircleChecker cc[DefaultWorkerNum];
+//vector<CircleChecker> cc;
 
 /* 为每个节点构建 layer2 and layer3 属性 */
-static void *constructLayer2(void *id) {
+void *constructLayer2(void *id) {
 	size_t gid = (size_t)(id); // group id
 	size_t wid = gid; // worker id
 	size_t start;
 	size_t end;
-#if defined(FULL_DATA_INFO)
+#if defined(MY_INFO) || defined(FULL_DATA_INFO)
 	cout << "[Info] Worker Group Construct Layer2: " << wid << endl;
 #endif
 	while (wid < WorkerNum) {
+#if defined(MY_INFO) || defined(FULL_DATA_INFO)
+		cc[wid].id = wid;
+		cc[wid].groupId = gid;
+#endif
+		cc[wid].initCircles();
 		start = Pub_workNodes[wid].offset;
 		end = Pub_workNodes[wid].end;
 		while (start < end) {
-			prepareLayer2(start);
-			//prepareLayer3(start);
+			cc[wid].prepareLayer_2(start);
 			start += 1;
 		} // end of loop (off < end)
 		wid += MaxThreadNum;
@@ -1202,14 +1111,20 @@ void *doJobs(void *id) {
 		cout << "Worker Group start at: " << wid << endl;
 #endif
 	while (wid < WorkerNum) {
-		cc[wid].initCircles();
 		start = Pub_workNodes[wid].offset;
 		end = Pub_workNodes[wid].end;
 		while (start < end) {
 			cc[wid].run(start);
 			start += 1;
+#if defined(MY_DEBUG) || defined(FULL_DATA_DEBUG)
+			if(start % 100 == 0)
+				cout << "Worker[" << wid << "] has done job " << start << endl;
+#endif
 		} // end of loop (off < end)
 		wid += MaxThreadNum;
+#if defined(MY_DEBUG) || defined(FULL_DATA_DEBUG)
+		cout << "Worker [" << wid << " - " << gid << "] ** Jobs all done " << end << endl;
+#endif
 	}
 #if defined(MY_INFO) || defined(FULL_DATA_INFO)
 	cout << "Worker Group [" << gid << "] ** Jobs all done " << end << endl;
@@ -1229,16 +1144,17 @@ void *doJobs(void *id) {
 	return NULL;
 }
 void *deinitNodes(void *id) {
-	idxMap.clear(); // release idxMap for not used
 	// release memory for nodes
 	Pub_workNodes.clear();
 	Pub_workNodes.shrink_to_fit();
-	pv.nodes.clear();
-	pv.nodes.shrink_to_fit();
-	pv.snodeUS3.clear();
-	pv.snodeUS3.shrink_to_fit();
-	pv.lastUS2.clear();
-	//pv.lastUS2.shrink_to_fit();
+	Pub_nodes.clear();
+	Pub_nodes.shrink_to_fit();
+	Pub_snodeUS3.clear();
+	Pub_snodeUS3.shrink_to_fit();
+#ifdef USE_NODE_LAST_3
+	Pub_lastUS3.clear();
+	//Pub_lastUS3.shrink_to_fit();
+#endif
 #ifdef FULL_DATA_INFO
 	cout << "[Info] deinitNodes All. " << endl;
 #endif
@@ -1263,17 +1179,16 @@ void *deinitCheckers(void *id) {
 
 pthread_t pId[MaxThreadNum + 1]; // +1 便于在后台执行清理工作
 
-int main(int argc, char *argv[]) {
 #ifdef USE_TESTER
-	auto now = system_clock::to_time_t(system_clock::now());
-	std::cout << "[TIS] " << std::put_time(std::localtime(&now), "%F %T") << endl;
-	auto time_start = high_resolution_clock::now();
+int test_readfile() {
+#else
+int main(int argc, char *argv[]) {
 #endif
 #ifdef FULL_DATA_INFO
 	cout << "Structure Size: "
 		<< " Transfer " << sizeof(STransfer) << endl
 		<< " GraphNode " << sizeof(SGraphNode) << " " << sizeof(unordered_set<SGraphNode *>)
-		<< endl
+		<< " GraphNodeConn " << sizeof(SGraphNodeConn2) << endl
 		<< " CircleCheker " << sizeof(CircleChecker)
 		<< " Circles " << sizeof(_Circle<3>) << " Circles " << sizeof(_Circle<7>) << endl
 		<< "Thread Nums " << MaxThreadNum << " Worker nums " << WorkerNum << endl
@@ -1284,9 +1199,9 @@ int main(int argc, char *argv[]) {
 	// start of main
 	readfile();
 	// ----------- start prepare ---------------
-	pv.prepareGraphNode();
+	prepareGraphNode();
 	// prepare layer2 and layer3 ids
-#if 0
+#if 1
 	ret = pthread_create(&pId[0], NULL, prepareGraphNode_n1, (void *)0);
 	ret = pthread_create(&pId[1], NULL, prepareGraphNode_l1, (void *)1);
 #else
@@ -1296,9 +1211,11 @@ int main(int argc, char *argv[]) {
 	prepareWork();
 	Pub_graphNoId.clear();
 
-	pv.resize();
-
-#if 0
+#ifdef USE_NODE_LAST_3
+	Pub_lastUS3.resize(Pub_graphSize);
+#endif
+	Pub_snodeUS3.resize(Pub_graphSize);
+#if 1
 	pthread_join(pId[0], NULL);
 	pthread_join(pId[1], NULL);
 #endif
@@ -1312,16 +1229,25 @@ int main(int argc, char *argv[]) {
 			exit(1);
 		}
 	}
+	idxMap.clear(); // release idxMap for not used
+#if !defined(TEST_LAYER2)
 	constructLayer2((void *)0);
-
+#else
+	cc[0].initCircles();
+	auto start = Pub_workNodes[0].offset;
+	auto end = Pub_workNodes[0].end;
+	while (start < end) {
+		cc[0].prepareLayer_2(start);
+		start += 1;
+	} // end of loop (off < end)
+#endif
 	for (i = 1; i < MaxThreadNum; i += 1) {
 		pthread_join(pId[i], NULL);
 	}
 	// -------- end of construct layer2 or layer3 ---------
-	prepareTreeParts();
-
 	// -------- start do jobs ---------
 	//创建子线程，线程id为pId
+#ifndef TEST_RUNLARGE
 	for (i = 1; i < MaxThreadNum; i ++ ) {
 		ret = pthread_create(&pId[i], NULL, doJobs, (void *)i);
 		if (ret != 0)
@@ -1330,11 +1256,25 @@ int main(int argc, char *argv[]) {
 			exit(1);
 		}
 	}
-	//doJobs((void *)0);
+	doJobs((void *)0);
 	for (i = 1; i < MaxThreadNum; i++) {
 		pthread_join(pId[i], NULL);
 	}
-
+#else
+	size_t gid = 0; // group id
+	size_t wid = gid; // worker id start
+	size_t start;
+	size_t end;
+	start = Pub_workNodes[wid].offset;
+	end = Pub_workNodes[wid].end;
+	while (start < end) {
+		cc[wid].run(start);
+		start += 1;
+	} // end of loop (off < end)
+	for (int index = 1; index < CircleSizeCount; index++)
+		cc[wid].circles[index]->sort();
+	cc[wid].cacheCircleCount();
+#endif
 	// -------- end of jobs ---------
 	// 无论 MaxThreadNum 为多少，清除工作都在后台执行
 	ret = pthread_create(&pId[0], NULL, deinitNodes, (void *)0);
@@ -1351,13 +1291,17 @@ int main(int argc, char *argv[]) {
 #if !defined(ON_WIN) && !defined(NotOutputToFile)
 	int fd = open(DataOutputFile, O_RDWR | O_CREAT, (mode_t)0666);
 	if(fd == -1) {
-		cout << "[E] Output to file  " << endl;
+		cout << "[Output ]Error " << endl;
 		close(fd);
 		return 1;
 	}
 	
 	const int iMaxFileSize = 300 * SIZE_MB;
-	ret = fallocate(fd, 0, 0, iMaxFileSize);
+	const int iFileSizeInc = 20 * SIZE_MB;
+	const int iFileMargin = 10 * SIZE_MB;
+	int iSizeInc = 60 * SIZE_MB;
+	int currentFileSize = 50 * SIZE_MB;
+	ret = fallocate(fd, 0, 0, currentFileSize);
 	if(ret == -1) {
 		cout << "Fallocate file failed" << endl;
 		close(fd);
@@ -1377,6 +1321,16 @@ int main(int argc, char *argv[]) {
 		for (i = 0; i < WorkerNum; i ++ ) {
 			bytesWrite = cc[i].circles[index]->print(mappedFileAddr + bytesStart);
 			bytesStart += bytesWrite;
+			if(bytesStart >= currentFileSize - iFileMargin) {
+				fallocate(fd, 0, currentFileSize, iSizeInc);
+				currentFileSize += iSizeInc;
+				if(iSizeInc > iFileSizeInc) {
+					iSizeInc -= (10 * SIZE_MB);
+				}
+#if defined(MY_INFO) || defined(FULL_DATA_INFO)
+				cout << "[Debug] on " << (iSizeInc  / SIZE_MB) << "MB now " << (currentFileSize / SIZE_MB) << endl;
+#endif
+			}
 		}
 	}
 	for (i = 0; i < WorkerNum; i ++ ) {
@@ -1390,6 +1344,16 @@ int main(int argc, char *argv[]) {
 				"%d,%d,%d,%d,%d,%d,%d\n", cycle7[ci][0], cycle7[ci][1], cycle7[ci][2],
 				cycle7[ci][3],cycle7[ci][4],cycle7[ci][5], cycle7[ci][6]);
 			bytesStart += bytesWrite;
+			if(bytesStart >= currentFileSize - iFileMargin) {
+				fallocate(fd, 0, currentFileSize, iSizeInc);
+				currentFileSize += iSizeInc;
+				if(iSizeInc > iFileSizeInc) {
+					iSizeInc -= (10 * SIZE_MB);
+				}
+#if defined(MY_INFO) || defined(FULL_DATA_INFO)
+				cout << "[Debug 7] " << (iSizeInc  / SIZE_MB) << "MB now " << (currentFileSize / SIZE_MB)<< endl;
+#endif
+			}
 		}
 	}
 #if defined(MY_INFO) || defined(FULL_DATA_INFO)
@@ -1429,28 +1393,19 @@ int main(int argc, char *argv[]) {
 	// 	// ret = pthread_create(&pId[i], NULL, deinitCheckers, (void *)i);
 	// 	deinitCheckers((void *) i);
 	// }
-
+#if defined(MY_DEBUG) || defined(FULL_DATA_DEBUG)
+	cout << "[Debug ] w0" << endl;
+#endif
 	for (i = 0; i < 1; i += 1) { // 0 确保 nodes 被 deinit 掉
 		pthread_join(pId[i], NULL);
 	}
-
-#ifdef USE_TESTER
-	auto stop = high_resolution_clock::now();
-	now = system_clock::to_time_t(system_clock::now());
-	std::cout << "[TIE] " << std::put_time(std::localtime(&now), "%F %T") << endl;
-	auto duration = duration_cast<seconds>(stop - time_start);
-	double passed = duration.count();
-	if (passed < 1.0) {
-		auto mduration = duration_cast<milliseconds>(stop - time_start);
-		passed = mduration.count();
-		std::cout << "Elapsed: " << passed << " milliseconds " << endl << endl;
-	}
-	else {
-		auto mduration = duration_cast<milliseconds>(stop - duration - time_start);
-		std::cout << "Elapsed: " << passed << " seconds "
-			<< mduration.count() << " ms " << endl << endl;
-
-	}
-#endif
 	return 0;
 }
+
+#ifdef USE_TESTER
+int main(int argc, char *argv[])
+{
+	TimeIt(test_readfile, 1);
+	return 0;
+}
+#endif
